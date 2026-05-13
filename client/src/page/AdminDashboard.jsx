@@ -8,6 +8,7 @@ import "./AdminDashboard.css";
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("my-flowers");
   const [user, setUser] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,6 +52,14 @@ export default function AdminDashboard() {
           <div className="navbar-brand">
             <h2>🌸 Admin Panel</h2>
           </div>
+          <button
+            className={`hamburger-menu ${mobileMenuOpen ? "active" : ""}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
           <div className="navbar-right">
             <span className="user-name">{user.name}</span>
             <button onClick={handleLogout} className="logout-btn">
@@ -61,22 +70,31 @@ export default function AdminDashboard() {
       </nav>
 
       <div className="admin-container">
-        <div className="tabs">
+        <div className={`tabs ${mobileMenuOpen ? "mobile-open" : ""}`}>
           <button
             className={`tab-btn ${activeTab === "my-flowers" ? "active" : ""}`}
-            onClick={() => setActiveTab("my-flowers")}
+            onClick={() => {
+              setActiveTab("my-flowers");
+              setMobileMenuOpen(false);
+            }}
           >
             🌸 Hoa của tôi
           </button>
           <button
             className={`tab-btn ${activeTab === "search" ? "active" : ""}`}
-            onClick={() => setActiveTab("search")}
+            onClick={() => {
+              setActiveTab("search");
+              setMobileMenuOpen(false);
+            }}
           >
             🔍 Tra cứu hoa
           </button>
           <button
             className={`tab-btn ${activeTab === "user-management" ? "active" : ""}`}
-            onClick={() => setActiveTab("user-management")}
+            onClick={() => {
+              setActiveTab("user-management");
+              setMobileMenuOpen(false);
+            }}
           >
             👥 Quản lý người dùng
           </button>

@@ -81,7 +81,39 @@
 .close-btn:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
+.user-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
+
+  /* Cho phép scroll toàn overlay nếu màn hình quá nhỏ */
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.user-form-container {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+
+  border-radius: 12px;
+  padding: 24px;
+
+  /* Quan trọng */
+  max-height: 90vh;
+  overflow-y: auto;
+
+  box-sizing: border-box;
+}
 .alert {
   margin: 0 1.5rem 1rem 1.5rem;
   padding: 0.75rem;

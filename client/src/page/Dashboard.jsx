@@ -7,6 +7,7 @@ import "./Dashboard.css";
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("my-flowers");
   const [user, setUser] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,17 +50,31 @@ export default function Dashboard() {
           <div className="navbar-brand">
             <h2>🌸 Flower Manage</h2>
           </div>
+          <button
+            className={`hamburger-menu ${mobileMenuOpen ? "active" : ""}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
 
-          <div className="navbar-menu">
+          <div className={`navbar-menu ${mobileMenuOpen ? "mobile-open" : ""}`}>
             <button
               className={`nav-link ${activeTab === "my-flowers" ? "active" : ""}`}
-              onClick={() => setActiveTab("my-flowers")}
+              onClick={() => {
+                setActiveTab("my-flowers");
+                setMobileMenuOpen(false);
+              }}
             >
               📝 Nhập hoa
             </button>
             <button
               className={`nav-link ${activeTab === "search" ? "active" : ""}`}
-              onClick={() => setActiveTab("search")}
+              onClick={() => {
+                setActiveTab("search");
+                setMobileMenuOpen(false);
+              }}
             >
               🔍 Tra cứu
             </button>

@@ -108,3 +108,31 @@
   background-color: var(--danger-color);
   color: white !important;
 }
+
+@media (max-width: 768px) {
+  .flower-card {
+    min-width: auto;
+    padding: 12px;
+  }
+
+  .flower-image {
+    height: 180px;
+  }
+
+  .flower-name {
+    font-size: 16px;
+  }
+
+  .flower-description {
+    font-size: 12px;
+  }
+
+  .flower-actions {
+    gap: 6px;
+  }
+
+  .btn {
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+}

@@ -128,3 +128,37 @@
   border-radius: 12px;
   margin-bottom: 12px;
 }
+.flower-form-container {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
+
+  /* Cho phép cuộn */
+  overflow-y: auto;
+
+  padding: 20px;
+}
+
+.flower-form {
+  width: 100%;
+  max-width: 500px;
+
+  background: #fff;
+
+  border-radius: 16px;
+
+  padding: 24px;
+
+  box-sizing: border-box;
+
+  /* Quan trọng */
+  max-height: 90vh;
+  overflow-y: auto;
+}

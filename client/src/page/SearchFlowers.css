@@ -99,7 +99,7 @@
 
 @media (max-width: 768px) {
   .flowers-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .page-header h1 {
