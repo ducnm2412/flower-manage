@@ -2,7 +2,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-
+import "./FlowerForm.css";
 import {
   uploadImageToImgBB,
 } from "../services/imageUpload";
