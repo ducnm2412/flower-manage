@@ -104,7 +104,12 @@ export default function FlowerForm({ flower, onSubmit, onCancel }) {
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              const formattedName = e.target.value
+                .toLowerCase() // Chuyển tất cả về chữ thường trước
+                .replace(/(^\w|\s\w)/g, (match) => match.toUpperCase()); // Viết hoa chữ cái đầu tiên và sau dấu cách
+              setName(formattedName);
+            }}
             placeholder="Nhập tên hoa"
             required
           />
@@ -135,7 +140,7 @@ export default function FlowerForm({ flower, onSubmit, onCancel }) {
           <input
             type="text"
             value={event}
-            onChange={(e) => setEvent(e.target.value)}
+            onChange={(e) => setEvent(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))}
             placeholder="Nhập sự kiện liên quan"
           />
         </div>

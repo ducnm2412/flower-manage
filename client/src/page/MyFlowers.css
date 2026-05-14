@@ -146,6 +146,20 @@
   animation: popup 0.25s ease;
 }
 
+.modal-container.select-flower-modal {
+  max-width: 1200px;
+  width: 95%;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-container.select-flower-modal .modal-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 30px;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

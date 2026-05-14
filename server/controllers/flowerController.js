@@ -186,8 +186,7 @@ export const addFlower = async (req, res) => {
     if (
       !name?.trim() ||
       !owners ||
-      !Array.isArray(owners) ||
-      owners.length === 0
+      !Array.isArray(owners)
     ) {
       return res.status(400).json({
         error: "name và owners là bắt buộc",
@@ -414,11 +413,7 @@ export const removeOwner = async (req, res) => {
 
     const owners = flowerData.owners || [];
 
-    if (owners.length <= 1) {
-      return res.status(400).json({
-        error: "Phải có ít nhất 1 owner",
-      });
-    }
+
 
     const updatedOwners = owners.filter((owner) => owner.ingame !== ingame);
 

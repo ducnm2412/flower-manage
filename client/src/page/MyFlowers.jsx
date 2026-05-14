@@ -16,22 +16,37 @@ export default function MyFlowers() {
   // ============================
   // USER INFO
   // ============================
-  const userIngame =
-    localStorage.getItem("userIngame");
+  const userIngame = localStorage.getItem("userIngame");
+  const userName = localStorage.getItem("userName");
+  const userRole = localStorage.getItem("userRole");
+  const isAdmin = userRole === "admin";
 
-  const userName =
-    localStorage.getItem("userName");
+  const [showSelectModal, setShowSelectModal] = useState(false);
+  const [allFlowers, setAllFlowers] = useState([]);
 
   // ============================
   // LOAD FLOWERS
   // ============================
   useEffect(() => {
-
-    if (userIngame) {
+    if (isAdmin) {
+      fetchAdminFlowers();
+    } else if (userIngame) {
       fetchUserFlowers();
     }
+  }, [isAdmin, userIngame]);
 
-  }, [userIngame]);
+  const fetchAdminFlowers = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await api.get("/flowers");
+      setFlowers(response.data);
+    } catch (err) {
+      setError("Không thể tải danh sách hoa: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ============================
   // FETCH FLOWERS
@@ -83,10 +98,8 @@ export default function MyFlowers() {
     try {
 
       const payload = {
-
         ...formData,
-
-        owners: [
+        owners: isAdmin ? [] : [
           {
             ingame: userIngame,
             name: userName,
@@ -197,45 +210,27 @@ export default function MyFlowers() {
     };
 
   // ============================
-  // DELETE FLOWER
+  // DELETE FLOWER OR REMOVE OWNER
   // ============================
-  const handleDeleteFlower =
-    async (flowerId) => {
-
-
-      try {
-
-        await api.delete(
-          `/flowers/${flowerId}`
-        );
-
-        setFlowers((prev) =>
-          prev.filter(
-            (flower) =>
-              flower.id !== flowerId
-          )
-        );
-
-        setMessage(
-          "Xóa hoa thành công!"
-        );
-
-        setTimeout(() => {
-          setMessage("");
-        }, 3000);
-
-      } catch (err) {
-
-        setError(
-          "Lỗi khi xóa hoa: " +
-            (
-              err.response?.data?.error ||
-              err.message
-            ),
-        );
-
+  const handleDeleteFlower = async (flowerId) => {
+    try {
+      if (isAdmin) {
+        await api.delete(`/flowers/${flowerId}`);
+      } else {
+        await api.delete(`/flowers/${flowerId}/owner`, {
+          data: { ingame: userIngame }
+        });
       }
-    };
+
+      setFlowers((prev) => prev.filter((flower) => flower.id !== flowerId));
+      setMessage("Xóa thành công!");
+      setTimeout(() => {
+        setMessage("");
+      }, 3000);
+    } catch (err) {
+      setError("Lỗi khi xóa: " + (err.response?.data?.error || err.message));
+    }
+  };
 
   // ============================
   // EDIT FLOWER
@@ -251,10 +246,36 @@ export default function MyFlowers() {
   // CANCEL FORM
   // ============================
   const handleCancel = () => {
-
     setEditingFlower(null);
-
     setShowForm(false);
+    setShowSelectModal(false);
+  };
+
+  // ============================
+  // FETCH ALL FLOWERS FOR USER
+  // ============================
+  const fetchAllFlowers = async () => {
+    try {
+      const response = await api.get("/flowers");
+      setAllFlowers(response.data);
+    } catch (err) {
+      setError("Không thể tải danh sách hoa: " + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const handleSelectFlowerToAdd = async (flowerId) => {
+    try {
+      await api.post(`/flowers/${flowerId}/owner`, {
+        ingame: userIngame,
+        name: userName,
+      });
+      setMessage("Thêm hoa thành công!");
+      setShowSelectModal(false);
+      fetchUserFlowers();
+      setTimeout(() => setMessage(""), 3000);
+    } catch (err) {
+      setError("Lỗi khi thêm: " + (err.response?.data?.error || err.message));
+    }
   };
 
   // ============================
@@ -287,21 +308,28 @@ export default function MyFlowers() {
       <div className="page-header">
 
         <h1>
-          Quản lý hoa của tôi
+          {isAdmin ? "Quản lý toàn bộ hoa" : "Quản lý hoa của tôi"}
         </h1>
 
         <button
           className="btn btn-primary"
           onClick={() => {
-
             setEditingFlower(null);
-
-            setShowForm(!showForm);
-
+            if (showForm || showSelectModal) {
+              setShowForm(false);
+              setShowSelectModal(false);
+            } else {
+              if (isAdmin) {
+                setShowForm(true);
+              } else {
+                fetchAllFlowers();
+                setShowSelectModal(true);
+              }
+            }
           }}
         >
           {
-            showForm
+            (showForm || showSelectModal)
               ? "✕ Đóng"
               : "+ Thêm hoa mới"
           }
@@ -350,19 +378,62 @@ export default function MyFlowers() {
       </div>
 
       <div className="modal-body">
-
         <FlowerForm
           flower={editingFlower}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
         />
-
       </div>
-
     </div>
-
   </div>
 )}
+
+      {/* SELECT MODAL FOR USER */}
+      {showSelectModal && !isAdmin && (
+        <div className="modal-overlay">
+          <div className="modal-container select-flower-modal">
+            <div className="modal-header">
+              <h2>🌸 Chọn hoa để thêm</h2>
+              <button className="modal-close" onClick={handleCancel}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="flowers-grid">
+                {allFlowers.map(flower => {
+                  const isOwned = flower.owners?.some(o => o.ingame === userIngame);
+                  return (
+                    <div 
+                      key={flower.id} 
+                      style={{ 
+                        border: isOwned ? '2px solid #10ac84' : '2px solid transparent', 
+                        borderRadius: '16px', 
+                        cursor: isOwned ? 'not-allowed' : 'pointer', 
+                        opacity: isOwned ? 0.6 : 1,
+                        position: 'relative',
+                        transition: 'transform 0.2s',
+                        transform: !isOwned ? 'scale(1)' : 'none'
+                      }}
+                      onMouseEnter={(e) => { if (!isOwned) e.currentTarget.style.transform = 'scale(1.05)' }}
+                      onMouseLeave={(e) => { if (!isOwned) e.currentTarget.style.transform = 'scale(1)' }}
+                      onClick={() => !isOwned && handleSelectFlowerToAdd(flower.id)}
+                    >
+                      <FlowerCard flower={flower} showActions={false} />
+                      {isOwned && (
+                        <div style={{
+                          position: 'absolute', top: '10px', right: '10px', 
+                          background: '#10ac84', color: 'white', padding: '4px 10px', 
+                          borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', zIndex: 10
+                        }}>
+                          Đã sở hữu
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* LOADING */}
       {
@@ -382,9 +453,10 @@ export default function MyFlowers() {
 
             <button
               className="btn btn-primary"
-              onClick={() =>
-                setShowForm(true)
-              }
+              onClick={() => {
+                if (isAdmin) setShowForm(true);
+                else { fetchAllFlowers(); setShowSelectModal(true); }
+              }}
             >
               + Thêm hoa đầu tiên
             </button>
@@ -401,7 +473,7 @@ export default function MyFlowers() {
                 <FlowerCard
                   key={flower.id}
                   flower={flower}
-                  onEdit={handleEdit}
+                  onEdit={isAdmin ? handleEdit : null}
                   onDelete={handleDeleteFlower}
                   showActions={true}
                 />

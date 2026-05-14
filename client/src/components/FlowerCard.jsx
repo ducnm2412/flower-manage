@@ -64,16 +64,18 @@ export default function FlowerCard({
         {/* Actions */}
         {showActions && (
           <div className="flower-actions">
-            <button
-              className="btn btn-edit btn-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(flower);
-              }}
-              title="Sửa"
-            >
-              Sửa
-            </button>
+            {onEdit && (
+              <button
+                className="btn btn-edit btn-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(flower);
+                }}
+                title="Sửa"
+              >
+                Sửa
+              </button>
+            )}
 
             <button
               className="btn btn-delete btn-sm"
