@@ -8,11 +8,8 @@
 
 /* Admin dashboard context - apply gradient background */
 .tab-content .search-flowers {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color-start) 0%,
-    var(--primary-color-end) 100%
-  );
+  width: 100%;
+  background: var(--bg-white);
   border-radius: var(--radius-lg);
   margin: -2rem;
   padding: 2rem;
@@ -25,7 +22,7 @@
 
 .page-header h1 {
   margin: 0;
-  color: white;
+  color: var(--text-primary);
   font-size: 28px;
 }
 
@@ -45,7 +42,7 @@
 .loading {
   text-align: center;
   padding: 40px 20px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
   font-size: 16px;
 }
 
@@ -53,14 +50,14 @@
 .initial-state {
   text-align: center;
   padding: 60px 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-light);
   border-radius: var(--radius-lg);
-  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border: 2px dashed var(--border-color);
 }
 
 .empty-state p,
 .initial-state p {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
   font-size: 16px;
   margin: 0;
 }
@@ -81,13 +78,13 @@
 }
 
 .results-info {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 20px;
 }
 
 .results-info strong {
-  color: white;
+  color: var(--text-primary);
   font-weight: 700;
 }
 

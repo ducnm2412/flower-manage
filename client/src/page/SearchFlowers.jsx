@@ -14,6 +14,16 @@ export default function SearchFlowers() {
   });
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Map Vietnamese color names to English
+  const colorMap = {
+    đỏ: "red",
+    red: "red",
+    tím: "purple",
+    purple: "purple",
+    cam: "orange",
+    orange: "orange",
+  };
+
   const handleSearch = async (params) => {
     setSearchParams(params);
     setHasSearched(true);
@@ -30,7 +40,12 @@ export default function SearchFlowers() {
       if (params.type === "name") {
         response = await api.get(`/flowers/search/name/${params.query}`);
       } else if (params.type === "color") {
-        response = await api.get(`/flowers/search/color/${params.query}`);
+        // Convert Vietnamese color name to English
+        const colorQuery =
+          colorMap[params.query.toLowerCase()] || params.query.toLowerCase();
+        response = await api.get(`/flowers/search/color/${colorQuery}`);
+      } else if (params.type === "username") {
+        response = await api.get(`/flowers/username/${params.query}`);
       }
 
       setFlowers(response.data || []);
@@ -62,7 +77,9 @@ export default function SearchFlowers() {
             Không tìm thấy hoa nào{" "}
             {searchParams.type === "name"
               ? `với tên "${searchParams.query}"`
-              : `với màu nền "${searchParams.query}"`}
+              : searchParams.type === "color"
+                ? `với màu nền "${searchParams.query}"`
+                : `của chủ nhân "${searchParams.query}"`}
           </p>
         </div>
       ) : hasSearched ? (

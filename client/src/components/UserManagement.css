@@ -6,11 +6,7 @@
 
 /* Admin dashboard context - apply gradient background */
 .tab-content .user-management {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color-start) 0%,
-    var(--primary-color-end) 100%
-  );
+  background: var(--bg-white);
   border-radius: var(--radius-lg);
   margin: -2rem;
   padding: 2rem;
@@ -29,6 +25,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -55,14 +52,14 @@
 }
 
 .user-management-header h3 {
-  color: white;
+  color: var(--text-primary);
   font-size: 1.5rem;
   margin: 0;
 }
 
 .btn-add {
-  background-color: white;
-  color: var(--primary-color);
+  background-color: var(--primary-color);
+  color: var(--bg-white);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
@@ -73,7 +70,7 @@
 }
 
 .btn-add:hover {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: var(--primary-color-dark);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
@@ -85,25 +82,25 @@
 .search-input {
   width: 100%;
   padding: 0.75rem 1.5rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: 1rem;
   transition: all var(--transition-normal);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--bg-white);
   color: var(--text-primary);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: white;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-color-light);
 }
 
 .loading,
 .no-users {
   text-align: center;
   padding: 3rem 2rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
@@ -124,50 +121,50 @@
 
 /* Admin dashboard context - adjust table styles for gradient background */
 .tab-content .users-table thead {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  background-color: var(--bg-light);
+  border-bottom: 2px solid var(--border-color);
 }
 
 .users-table th {
   padding: 1rem;
   text-align: left;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
 /* Admin dashboard context - white text for table headers */
 .tab-content .users-table th {
-  color: white;
+  color: var(--text-primary);
 }
 
 .users-table tbody tr {
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-color);
   transition: background-color 0.2s ease;
 }
 
 /* Admin dashboard context - adjust row hover for gradient background */
 .tab-content .users-table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .users-table tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--bg-light);
 }
 
 /* Admin dashboard context - adjust hover for gradient background */
 .tab-content .users-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-light);
 }
 
 .users-table td {
   padding: 1rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 /* Admin dashboard context - white text for table data */
 .tab-content .users-table td {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
 }
 
 .user-name {
@@ -184,9 +181,6 @@
   font-size: 0.9rem;
 }
 
-.user-role {
-  text-align: center;
-}
 
 .role-badge {
   display: inline-block;

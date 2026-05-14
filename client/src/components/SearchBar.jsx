@@ -36,6 +36,7 @@ export default function SearchBar({ onSearch, searchType = "name" }) {
           >
             <option value="name">Tên hoa</option>
             <option value="color">Màu nền</option>
+            <option value="username">Tên chủ nhân</option>
           </select>
         </div>
 
@@ -49,7 +50,9 @@ export default function SearchBar({ onSearch, searchType = "name" }) {
             placeholder={
               type === "name"
                 ? "Nhập tên hoa..."
-                : "Nhập màu nền (hex hoặc tên)..."
+                : type === "color"
+                  ? "Nhập màu (ví dụ: đỏ, tím, cam)..."
+                  : "Nhập tên chủ nhân..."
             }
             className="search-input"
           />

@@ -1,41 +1,43 @@
 /* Color Variables for Flower Management App */
 
 :root {
-  /* Primary Colors - Admin Gradient */
-  --primary-color-start: #667eea;
-  --primary-color-end: #764ba2;
-  --primary-color: #667eea;
-  --primary-color-light: #8a9bea;
-  --primary-color-dark: #4f6dd9;
+  /* Primary Colors - Vibrant Soft Blue */
+  --primary-color-start: #4facfe;
+  --primary-color-end: #00f2fe;
+  --primary-color: #4facfe;
+  --primary-color-light: #e0f2fe;
+  --primary-color-dark: #0ea5e9;
 
   /* Secondary Colors */
-  --secondary-color: #764ba2;
-  --secondary-color-light: #9456b3;
+  --secondary-color: #1e293b;
+  --secondary-color-light: #475569;
 
   /* Status Colors */
-  --danger-color: #ff6b6b;
-  --danger-color-hover: #ff5252;
-  --warning-color: #ffc107;
-  --warning-color-hover: #ffb300;
-  --success-color: #10b981;
-  --info-color: #3b82f6;
+  --danger-color: #ff7675;
+  --danger-color-hover: #d63031;
+  --warning-color: #fdcb6e;
+  --warning-color-hover: #e17055;
+  --success-color: #55efc4;
+  --info-color: #74b9ff;
 
   /* Neutral Colors */
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --text-light: #999999;
-  --bg-light: #f9fafb;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-light: #94a3b8;
+  --bg-main: #f8fafc;
+  --bg-light: #f1f5f9;
   --bg-white: #ffffff;
-  --border-color: #e5e7eb;
-  --border-color-light: #dddddd;
-  --shadow-light: rgba(0, 0, 0, 0.05);
-  --shadow-medium: rgba(0, 0, 0, 0.1);
-  --shadow-dark: rgba(0, 0, 0, 0.15);
+  --border-color: #e2e8f0;
+  --border-color-light: #f1f5f9;
+  
+  /* Modern Shadows */
+  --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-dark: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
   /* Overlay Colors */
-  --overlay-dark: rgba(0, 0, 0, 0.1);
-  --overlay-white: rgba(255, 255, 255, 0.1);
-  --overlay-white-light: rgba(255, 255, 255, 0.2);
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+  --overlay-white: rgba(255, 255, 255, 0.8);
 
   /* Badge Colors */
   --badge-bg: #fef3c7;
@@ -43,14 +45,12 @@
 
   /* Card Colors */
   --card-bg: #ffffff;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 15px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 
   /* Transitions */
   --transition-fast: 0.2s ease;

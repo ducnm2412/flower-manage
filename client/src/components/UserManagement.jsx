@@ -40,7 +40,6 @@ export default function UserManagement() {
 
   // Handle delete user
   const handleDeleteUser = async (userId) => {
-
     try {
       setError("");
       await api.delete(`/auth/users/${userId}`, {
@@ -85,9 +84,7 @@ export default function UserManagement() {
   const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.ingame.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.email &&
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())),
+      user.ingame.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -111,7 +108,7 @@ export default function UserManagement() {
       <div className="search-section">
         <input
           type="text"
-          placeholder="Tìm kiếm theo tên, ingame hoặc email..."
+          placeholder="Tìm kiếm theo tên hoặc ingame..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
@@ -127,26 +124,26 @@ export default function UserManagement() {
           <table className="users-table">
             <thead>
               <tr>
+                <th>Đăng nhập</th>
                 <th>Tên người dùng</th>
-                <th>Ingame</th>
-                <th>Email</th>
-                <th>Vai trò</th>
                 <th>Năm tham gia</th>
+                <th>Vai trò</th>
                 <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.id} className="user-row">
+                  <td className="user-ingame">
+                    <strong>{user.ingame}</strong>
+                  </td>
                   <td className="user-name">{user.name}</td>
-                  <td className="user-ingame">{user.ingame}</td>
-                  <td className="user-email">{user.email || "-"}</td>
+                  <td className="user-year">{user.year}</td>
                   <td className="user-role">
                     <span className={`role-badge role-${user.role}`}>
-                      {user.role === "admin" ? "👤 Admin" : "👤 User"}
+                      {user.role === "admin" ? "🚫 Admin" : "👤 User"}
                     </span>
                   </td>
-                  <td className="user-year">{user.year || "-"}</td>
                   <td className="user-actions">
                     <button
                       className="btn-edit"

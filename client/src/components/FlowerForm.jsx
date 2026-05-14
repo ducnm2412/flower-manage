@@ -1,248 +1,171 @@
-import React, {
-  useState,
-  useEffect,
-} from "react";
+import React, { useState, useEffect } from "react";
 import "./FlowerForm.css";
-import {
-  uploadImageToImgBB,
-} from "../services/imageUpload";
+import { uploadImageToImgBB } from "../services/imageUpload";
 
-export default function FlowerForm({
-  flower,
-  onSubmit,
-  onCancel,
-}) {
-
+export default function FlowerForm({ flower, onSubmit, onCancel }) {
   // =========================
   // STATES
   // =========================
-  const [name, setName] =
-    useState("");
+  const [name, setName] = useState("");
 
-  const [
-    backgroundColor,
-    setBackgroundColor,
-  ] = useState("red");
+  const [backgroundColor, setBackgroundColor] = useState("red");
 
-  const [image, setImage] =
-    useState(null);
+  const [image, setImage] = useState(null);
 
-  const [
-    previewImage,
-    setPreviewImage,
-  ] = useState("");
+  const [previewImage, setPreviewImage] = useState("");
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [description, setDescription] = useState("");
+
+  const [event, setEvent] = useState("");
 
   // =========================
   // LOAD FLOWER DATA
   // =========================
   useEffect(() => {
-
     if (flower) {
-
       setName(flower.name);
 
-      setBackgroundColor(
-        flower.backgroundColor
-      );
+      setBackgroundColor(flower.backgroundColor);
 
-      setPreviewImage(
-        flower.imageUrl || ""
-      );
+      setPreviewImage(flower.imageUrl || "");
+
+      setDescription(flower.description || "");
+
+      setEvent(flower.event || "");
     }
-
   }, [flower]);
 
   // =========================
   // HANDLE IMAGE CHANGE
   // =========================
-  const handleImageChange = (
-    e
-  ) => {
-
-    const file =
-      e.target.files[0];
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
 
     if (!file) return;
 
     setImage(file);
 
-    setPreviewImage(
-      URL.createObjectURL(file)
-    );
+    setPreviewImage(URL.createObjectURL(file));
   };
 
   // =========================
   // HANDLE SUBMIT
   // =========================
-  const handleSubmit =
-    async (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-      e.preventDefault();
+    setLoading(true);
 
-      setLoading(true);
+    try {
+      let imageUrl = flower?.imageUrl || "";
 
-      try {
-
-        let imageUrl =
-          flower?.imageUrl || "";
-
-        // =====================
-        // UPLOAD IMAGE TO IMGBB
-        // =====================
-        if (image) {
-
-          imageUrl =
-            await uploadImageToImgBB(
-              image
-            );
-        }
-
-        // =====================
-        // SUBMIT DATA
-        // =====================
-        await onSubmit({
-
-          name,
-
-          backgroundColor,
-
-          imageUrl,
-        });
-
-      } catch (error) {
-
-        console.error(error);
-
-        alert(
-          "Upload ảnh thất bại"
-        );
-
-      } finally {
-
-        setLoading(false);
-
+      // =====================
+      // UPLOAD IMAGE TO IMGBB
+      // =====================
+      if (image) {
+        imageUrl = await uploadImageToImgBB(image);
       }
-    };
+
+      // =====================
+      // SUBMIT DATA
+      // =====================
+      await onSubmit({
+        name,
+
+        backgroundColor,
+
+        description,
+
+        event,
+
+        imageUrl,
+      });
+    } catch (error) {
+      console.error(error);
+
+      alert("Upload ảnh thất bại");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-
     <div className="flower-form-container">
-
-      <form
-        className="flower-form"
-        onSubmit={handleSubmit}
-      >
-
+      <form className="flower-form" onSubmit={handleSubmit}>
         {/* TITLE */}
-        <h2>
-          {
-            flower
-              ? "✏️ Sửa hoa"
-              : "🌸 Thêm hoa"
-          }
-        </h2>
+        <h2>{flower ? "✏️ Sửa hoa" : "🌸 Thêm hoa"}</h2>
 
         {/* FLOWER NAME */}
         <div className="form-group">
-
-          <label>
-            Tên hoa
-          </label>
+          <label>Tên hoa</label>
 
           <input
             type="text"
             value={name}
-            onChange={(e) =>
-              setName(
-                e.target.value
-              )
-            }
+            onChange={(e) => setName(e.target.value)}
             placeholder="Nhập tên hoa"
             required
           />
-
         </div>
 
         {/* BACKGROUND COLOR */}
         <div className="form-group">
-
-          <label>
-            Màu nền
-          </label>
+          <label>Màu nền</label>
 
           <select
-            value={
-              backgroundColor
-            }
-            onChange={(e) =>
-              setBackgroundColor(
-                e.target.value
-              )
-            }
+            value={backgroundColor}
+            onChange={(e) => setBackgroundColor(e.target.value)}
           >
+            <option value="red">🔴 Màu đỏ</option>
 
-            <option value="red">
-              🔴 Màu đỏ
-            </option>
+            <option value="purple">🟣 Màu tím</option>
 
-            <option value="purple">
-              🟣 Màu tím
-            </option>
-
-            <option value="orange">
-              🟠 Màu cam
-            </option>
-
+            <option value="orange">🟠 Màu cam</option>
           </select>
+        </div>
 
+        {/* DESCRIPTION */}
+
+        {/* EVENT */}
+        <div className="form-group">
+          <label>Sự kiện</label>
+
+          <input
+            type="text"
+            value={event}
+            onChange={(e) => setEvent(e.target.value)}
+            placeholder="Nhập sự kiện liên quan"
+          />
         </div>
 
         {/* IMAGE UPLOAD */}
         <div className="form-group">
+          <label>Ảnh hoa</label>
 
-          <label>
-            Ảnh hoa
-          </label>
-
-          <input
-            type="file"
-            accept="image/*"
-            onChange={
-              handleImageChange
-            }
-          />
-
+          <input type="file" accept="image/*" onChange={handleImageChange} />
         </div>
 
         {/* IMAGE PREVIEW */}
-        {
-          previewImage && (
-
-            <div
-              className="
+        {previewImage && (
+          <div
+            className="
                 image-preview
               "
-            >
-
-              <img
-                src={previewImage}
-                alt="Preview"
-                className="
+          >
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="
                   preview-image
                 "
-              />
-
-            </div>
-
-          )
-        }
+            />
+          </div>
+        )}
 
         {/* BUTTONS */}
         <div className="form-actions">
-
           <button
             type="submit"
             className="
@@ -250,15 +173,7 @@ export default function FlowerForm({
             "
             disabled={loading}
           >
-
-            {
-              loading
-                ? "Đang upload..."
-                : flower
-                ? "Cập nhật"
-                : "Thêm hoa"
-            }
-
+            {loading ? "Đang upload..." : flower ? "Cập nhật" : "Thêm hoa"}
           </button>
 
           <button
@@ -270,11 +185,8 @@ export default function FlowerForm({
           >
             Hủy
           </button>
-
         </div>
-
       </form>
-
     </div>
   );
 }

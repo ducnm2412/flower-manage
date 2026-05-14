@@ -26,13 +26,11 @@
 .search-field label {
   font-weight: 600;
   font-size: 14px;
-  color: white;
 }
 
 .search-select,
 .search-input {
   padding: 10px 12px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 14px;

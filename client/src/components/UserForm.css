@@ -177,6 +177,21 @@ form {
   gap: 1rem;
 }
 
+.form-info {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+
+.form-info p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .form-actions {
   display: flex;
   gap: 1rem;

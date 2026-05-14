@@ -6,7 +6,6 @@ export default function UserForm({ user, onClose, onSubmit, userRole }) {
   const [formData, setFormData] = useState({
     name: "",
     ingame: "",
-    email: "",
     year: new Date().getFullYear(),
     role: "user",
   });
@@ -124,19 +123,27 @@ export default function UserForm({ user, onClose, onSubmit, userRole }) {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="role">Vai trò</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+            {user && (
+              <div className="form-group">
+                <label htmlFor="role">Vai trò</label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            )}
           </div>
+
+          {!user && (
+            <div className="form-info">
+              <p>📄 Vai trò mới user sẽ tự động là "User"</p>
+            </div>
+          )}
 
           <div className="form-actions">
             <button
