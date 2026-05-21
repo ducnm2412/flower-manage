@@ -1,5 +1,7 @@
 import { db } from "../config/firebase.js";
 
+const normalizeSearchText = (value) => String(value || "").trim().toLowerCase();
+
 // =====================================
 // GET ALL FLOWERS
 // =====================================
@@ -40,12 +42,12 @@ export const searchByName = async (req, res) => {
     // Get all flowers and filter by name (case-insensitive)
     const snapshot = await db.collection("flowers").get();
 
-    const searchNameLower = name.toLowerCase();
+    const searchNameLower = normalizeSearchText(name);
     const flowers = [];
 
     snapshot.forEach((doc) => {
       const flowerName = doc.data().name || "";
-      if (flowerName.toLowerCase().includes(searchNameLower)) {
+      if (normalizeSearchText(flowerName).includes(searchNameLower)) {
         flowers.push({
           id: doc.id,
           ...doc.data(),
@@ -62,24 +64,33 @@ export const searchByName = async (req, res) => {
 };
 
 // =====================================
-// SEARCH FLOWER BY COLOR
+// SEARCH FLOWER BY COLOR (CASE-INSENSITIVE)
 // =====================================
 export const searchByColor = async (req, res) => {
   try {
     const { color } = req.params;
 
-    const snapshot = await db
-      .collection("flowers")
-      .where("backgroundColor", "==", color)
-      .get();
+    if (!color?.trim()) {
+      return res.status(400).json({
+        error: "Mau nen khong duoc de trong",
+      });
+    }
+
+    const snapshot = await db.collection("flowers").get();
+    const searchColorLower = normalizeSearchText(color);
 
     const flowers = [];
 
     snapshot.forEach((doc) => {
-      flowers.push({
-        id: doc.id,
-        ...doc.data(),
-      });
+      const data = doc.data();
+      const flowerColor = data.backgroundColor || "";
+
+      if (normalizeSearchText(flowerColor) === searchColorLower) {
+        flowers.push({
+          id: doc.id,
+          ...data,
+        });
+      }
     });
 
     res.json(flowers);

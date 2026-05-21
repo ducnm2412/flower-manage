@@ -6,29 +6,32 @@ const adminExists = async () => {
     .collection("users")
     .where("role", "==", "admin")
     .get();
+
   return !adminSnapshot.empty;
 };
 
-// Login user/admin
+// ==========================
+// LOGIN
+// ==========================
 export const login = async (req, res) => {
   try {
-    const { ingame, name } = req.body;
+    const { ingame, password } = req.body;
 
     // Validate
-    if (!ingame || !name) {
+    if (!ingame || !password) {
       return res.status(400).json({
-        error: "ingame và name là bắt buộc",
+        error: "ingame và password là bắt buộc",
       });
     }
 
-    // Tìm user theo ingame
+    // Find user
     const snapshot = await db
       .collection("users")
       .where("ingame", "==", ingame)
-      .where("name", "==", name)
+      .where("password", "==", password)
       .get();
 
-    // Không tìm thấy
+    // Not found
     if (snapshot.empty) {
       return res.status(401).json({
         error: "Thông tin đăng nhập không chính xác",
@@ -44,6 +47,9 @@ export const login = async (req, res) => {
       };
     });
 
+    // Không trả password về frontend
+    delete userData.password;
+
     res.json({
       message: "Đăng nhập thành công",
       user: userData,
@@ -55,7 +61,9 @@ export const login = async (req, res) => {
   }
 };
 
-// Lấy tất cả users
+// ==========================
+// GET ALL USERS
+// ==========================
 export const getAllUsers = async (req, res) => {
   try {
     const userRole = req.headers["x-user-role"];
@@ -71,9 +79,13 @@ export const getAllUsers = async (req, res) => {
     const users = [];
 
     snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      delete data.password;
+
       users.push({
         id: doc.id,
-        ...doc.data(),
+        ...data,
       });
     });
 
@@ -85,7 +97,9 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Thêm user
+// ==========================
+// ADD USER
+// ==========================
 export const addUser = async (req, res) => {
   try {
     const userRole = req.headers["x-user-role"];
@@ -96,12 +110,12 @@ export const addUser = async (req, res) => {
       });
     }
 
-    const { ingame, name, year } = req.body;
+    const { ingame, name, password, year } = req.body;
 
     // Validate
-    if (!ingame || !name || !year) {
+    if (!ingame || !name || !password || !year) {
       return res.status(400).json({
-        error: "ingame, name, year là bắt buộc",
+        error: "ingame, name, password, year là bắt buộc",
       });
     }
 
@@ -117,10 +131,11 @@ export const addUser = async (req, res) => {
       });
     }
 
-    // Create user with role 'user' (force role to be 'user')
+    // Create user
     const newUser = {
       ingame: ingame.trim(),
       name: name.trim(),
+      password: password.trim(),
       role: "user",
       year,
       createdAt: new Date(),
@@ -128,12 +143,17 @@ export const addUser = async (req, res) => {
 
     const docRef = await db.collection("users").add(newUser);
 
+    // Không trả password
+    const responseUser = {
+      id: docRef.id,
+      ...newUser,
+    };
+
+    delete responseUser.password;
+
     res.status(201).json({
       message: "Thêm user thành công",
-      user: {
-        id: docRef.id,
-        ...newUser,
-      },
+      user: responseUser,
     });
   } catch (error) {
     res.status(500).json({
@@ -142,7 +162,9 @@ export const addUser = async (req, res) => {
   }
 };
 
-// Update user
+// ==========================
+// UPDATE USER
+// ==========================
 export const updateUser = async (req, res) => {
   try {
     const userRole = req.headers["x-user-role"];
@@ -155,7 +177,7 @@ export const updateUser = async (req, res) => {
 
     const { id } = req.params;
 
-    const { ingame, name, role, year } = req.body;
+    const { ingame, name, password, role, year } = req.body;
 
     const userDoc = await db.collection("users").doc(id).get();
 
@@ -165,22 +187,21 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    // Check if trying to change someone to admin
+    // Check admin
     if (role === "admin") {
-      // Check if admin already exists
       const adminSnapshot = await db
         .collection("users")
         .where("role", "==", "admin")
         .get();
 
-      // If admin exists and it's not this user, reject
       if (!adminSnapshot.empty) {
         const currentUserIsAdmin = adminSnapshot.docs.some(
           (doc) => doc.id === id,
         );
+
         if (!currentUserIsAdmin) {
           return res.status(400).json({
-            error: "Chỉ có thể có một admin duy nhất. Admin đã tồn tại.",
+            error: "Chỉ có thể có một admin duy nhất",
           });
         }
       }
@@ -188,13 +209,20 @@ export const updateUser = async (req, res) => {
 
     const updateData = {};
 
-    if (ingame !== undefined) updateData.ingame = ingame.trim();
+    if (ingame !== undefined)
+      updateData.ingame = ingame.trim();
 
-    if (name !== undefined) updateData.name = name.trim();
+    if (name !== undefined)
+      updateData.name = name.trim();
 
-    if (role !== undefined) updateData.role = role;
+    if (password !== undefined)
+      updateData.password = password.trim();
 
-    if (year !== undefined) updateData.year = year;
+    if (role !== undefined)
+      updateData.role = role;
+
+    if (year !== undefined)
+      updateData.year = year;
 
     updateData.updatedAt = new Date();
 
@@ -202,12 +230,16 @@ export const updateUser = async (req, res) => {
 
     const updatedDoc = await db.collection("users").doc(id).get();
 
+    const userData = {
+      id: updatedDoc.id,
+      ...updatedDoc.data(),
+    };
+
+    delete userData.password;
+
     res.json({
       message: "Cập nhật user thành công",
-      user: {
-        id: updatedDoc.id,
-        ...updatedDoc.data(),
-      },
+      user: userData,
     });
   } catch (error) {
     res.status(500).json({
@@ -216,7 +248,9 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Delete user
+// ==========================
+// DELETE USER
+// ==========================
 export const deleteUser = async (req, res) => {
   try {
     const userRole = req.headers["x-user-role"];
@@ -242,6 +276,47 @@ export const deleteUser = async (req, res) => {
     res.json({
       message: "Xóa user thành công",
       id,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+export const changePassword = async (req, res) => {
+  try {
+    const { userId, oldPassword, newPassword } = req.body;
+
+    if (!userId || !oldPassword || !newPassword) {
+      return res.status(400).json({
+        error: "Thiếu userId, oldPassword hoặc newPassword",
+      });
+    }
+
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({
+        error: "Không tìm thấy user",
+      });
+    }
+
+    const userData = userDoc.data();
+
+    if (userData.password !== oldPassword) {
+      return res.status(400).json({
+        error: "Mật khẩu cũ không đúng",
+      });
+    }
+
+    await userRef.update({
+      password: newPassword,
+      updatedAt: new Date(),
+    });
+
+    res.json({
+      message: "Đổi mật khẩu thành công",
     });
   } catch (error) {
     res.status(500).json({

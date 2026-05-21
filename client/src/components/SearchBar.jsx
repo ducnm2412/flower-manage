@@ -51,7 +51,7 @@ export default function SearchBar({ onSearch, searchType = "name" }) {
               type === "name"
                 ? "Nhập tên hoa..."
                 : type === "color"
-                  ? "Nhập màu (ví dụ: đỏ, tím, cam)..."
+                  ? "Nhập màu (ví dụ: đỏ, tím, cam, lam, lục)..."
                   : "Nhập tên chủ nhân..."
             }
             className="search-input"

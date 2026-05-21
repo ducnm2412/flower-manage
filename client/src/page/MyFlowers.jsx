@@ -12,6 +12,7 @@ export default function MyFlowers() {
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [adminSearchTerm, setAdminSearchTerm] = useState("");
 
   // ============================
   // USER INFO
@@ -23,6 +24,15 @@ export default function MyFlowers() {
 
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [allFlowers, setAllFlowers] = useState([]);
+  const [addingFlowerIds, setAddingFlowerIds] = useState([]);
+
+  const colorLabels = {
+    red: "do đỏ red",
+    purple: "tim tím purple",
+    orange: "cam orange",
+    blue: "lam xanh lam blue",
+    green: "luc lục xanh lục xanh luc green",
+  };
 
   // ============================
   // LOAD FLOWERS
@@ -264,17 +274,53 @@ export default function MyFlowers() {
   };
 
   const handleSelectFlowerToAdd = async (flowerId) => {
+    if (addingFlowerIds.includes(flowerId)) return;
+
+    setAddingFlowerIds((prev) => [...prev, flowerId]);
+
     try {
       await api.post(`/flowers/${flowerId}/owner`, {
         ingame: userIngame,
         name: userName,
       });
+
+      const owner = {
+        ingame: userIngame,
+        name: userName,
+      };
+      const selectedFlower = allFlowers.find((flower) => flower.id === flowerId);
+
+      setAllFlowers((prev) =>
+        prev.map((flower) =>
+          flower.id === flowerId
+            ? {
+                ...flower,
+                owners: [...(flower.owners || []), owner],
+              }
+            : flower,
+        ),
+      );
+
+      if (selectedFlower) {
+        setFlowers((prev) =>
+          prev.some((flower) => flower.id === flowerId)
+            ? prev
+            : [
+                ...prev,
+                {
+                  ...selectedFlower,
+                  owners: [...(selectedFlower.owners || []), owner],
+                },
+              ],
+        );
+      }
+
       setMessage("Thêm hoa thành công!");
-      setShowSelectModal(false);
-      fetchUserFlowers();
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {
       setError("Lỗi khi thêm: " + (err.response?.data?.error || err.message));
+    } finally {
+      setAddingFlowerIds((prev) => prev.filter((id) => id !== flowerId));
     }
   };
 
@@ -299,6 +345,30 @@ export default function MyFlowers() {
 
     }
   };
+
+  const normalizedAdminSearchTerm = adminSearchTerm.trim().toLowerCase();
+
+  const displayedFlowers =
+    isAdmin && normalizedAdminSearchTerm
+      ? flowers.filter((flower) => {
+          const ownerText = (flower.owners || [])
+            .map((owner) => `${owner.ingame || ""} ${owner.name || ""}`)
+            .join(" ");
+          const searchableText = [
+            flower.name,
+            flower.event,
+            flower.description,
+            flower.backgroundColor,
+            colorLabels[flower.backgroundColor],
+            ownerText,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+          return searchableText.includes(normalizedAdminSearchTerm);
+        })
+      : flowers;
 
   return (
 
@@ -354,6 +424,26 @@ export default function MyFlowers() {
         )
       }
 
+      {isAdmin && (
+        <div className="admin-flower-search">
+          <input
+            type="text"
+            value={adminSearchTerm}
+            onChange={(e) => setAdminSearchTerm(e.target.value)}
+            placeholder="Tìm kiếm hoa theo tên, màu nền, sự kiện hoặc chủ sở hữu..."
+          />
+          {adminSearchTerm && (
+            <button
+              type="button"
+              className="admin-flower-search-clear"
+              onClick={() => setAdminSearchTerm("")}
+            >
+              Xóa
+            </button>
+          )}
+        </div>
+      )}
+
       {/* FORM */}
       {showForm && (
   <div className="modal-overlay">
@@ -400,30 +490,31 @@ export default function MyFlowers() {
               <div className="flowers-grid">
                 {allFlowers.map(flower => {
                   const isOwned = flower.owners?.some(o => o.ingame === userIngame);
+                  const isAdding = addingFlowerIds.includes(flower.id);
                   return (
                     <div 
                       key={flower.id} 
                       style={{ 
                         border: isOwned ? '2px solid #10ac84' : '2px solid transparent', 
                         borderRadius: '16px', 
-                        cursor: isOwned ? 'not-allowed' : 'pointer', 
-                        opacity: isOwned ? 0.6 : 1,
+                        cursor: isOwned || isAdding ? 'not-allowed' : 'pointer', 
+                        opacity: isOwned || isAdding ? 0.6 : 1,
                         position: 'relative',
                         transition: 'transform 0.2s',
-                        transform: !isOwned ? 'scale(1)' : 'none'
+                        transform: !isOwned && !isAdding ? 'scale(1)' : 'none'
                       }}
-                      onMouseEnter={(e) => { if (!isOwned) e.currentTarget.style.transform = 'scale(1.05)' }}
-                      onMouseLeave={(e) => { if (!isOwned) e.currentTarget.style.transform = 'scale(1)' }}
-                      onClick={() => !isOwned && handleSelectFlowerToAdd(flower.id)}
+                      onMouseEnter={(e) => { if (!isOwned && !isAdding) e.currentTarget.style.transform = 'scale(1.05)' }}
+                      onMouseLeave={(e) => { if (!isOwned && !isAdding) e.currentTarget.style.transform = 'scale(1)' }}
+                      onClick={() => !isOwned && !isAdding && handleSelectFlowerToAdd(flower.id)}
                     >
                       <FlowerCard flower={flower} showActions={false} />
-                      {isOwned && (
+                      {(isOwned || isAdding) && (
                         <div style={{
                           position: 'absolute', top: '10px', right: '10px', 
                           background: '#10ac84', color: 'white', padding: '4px 10px', 
                           borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', zIndex: 10
                         }}>
-                          Đã sở hữu
+                          {isAdding ? "Đang thêm..." : "Đã sở hữu"}
                         </div>
                       )}
                     </div>
@@ -443,7 +534,7 @@ export default function MyFlowers() {
             Đang tải hoa...
           </div>
 
-        ) : flowers.length === 0 ? (
+        ) : displayedFlowers.length === 0 ? (
 
           <div className="empty-state">
 
@@ -468,7 +559,7 @@ export default function MyFlowers() {
           <div className="flowers-grid">
 
             {
-              flowers.map((flower) => (
+              displayedFlowers.map((flower) => (
 
                 <FlowerCard
                   key={flower.id}

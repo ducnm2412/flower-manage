@@ -6,9 +6,9 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/authController.js";
-
+import { changePassword } from "../controllers/authController.js";
 const router = express.Router();
-
+router.put("/change-password", changePassword);
 // Login cho user và admin
 router.post("/login", login);
 

@@ -136,3 +136,31 @@
   color: var(--text-light);
   font-size: 12px;
 }
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password:hover {
+  opacity: 0.7;
+}

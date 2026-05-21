@@ -128,6 +128,10 @@ export default function FlowerForm({ flower, onSubmit, onCancel }) {
             <option value="purple">🟣 Màu tím</option>
 
             <option value="orange">🟠 Màu cam</option>
+
+            <option value="blue">🔵 Màu lam</option>
+
+            <option value="green">🟢 Màu lục</option>
           </select>
         </div>
 

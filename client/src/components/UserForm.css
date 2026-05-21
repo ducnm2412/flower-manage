@@ -235,7 +235,30 @@ form {
   opacity: 0.6;
   cursor: not-allowed;
 }
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
 
+.password-wrapper input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.toggle-password:hover {
+  opacity: 0.7;
+}
 @media (max-width: 768px) {
   .user-form-container {
     width: 95%;

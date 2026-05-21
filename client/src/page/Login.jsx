@@ -7,7 +7,9 @@ import "./Login.css";
 
 export default function Login() {
   const [ingame, setIngame] = useState("");
-  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,18 +24,18 @@ export default function Login() {
 
     try {
       // Validate
-      if (!ingame.trim() || !name.trim()) {
-        setError("Ingame và tên không được để trống");
+      if (!ingame.trim() || !password.trim()) {
+        setError("Ingame và password không được để trống");
 
         setLoading(false);
 
         return;
       }
 
-      // Call API
+      // API LOGIN
       const response = await api.post("/auth/login", {
         ingame: ingame.trim(),
-        name: name.trim(),
+        password: password.trim(),
       });
 
       // Save localStorage
@@ -47,7 +49,7 @@ export default function Login() {
 
       localStorage.setItem("userYear", response.data.user.year);
 
-      // Navigate to appropriate dashboard based on role
+      // Redirect
       if (response.data.user.role === "admin") {
         navigate("/admin");
       } else {
@@ -65,39 +67,82 @@ export default function Login() {
       <div className="login-card">
         <h1>🌸 Flower Manage</h1>
 
-        <p className="subtitle">Đăng nhập để quản lý hoa</p>
+        <p className="subtitle">
+          Đăng nhập để quản lý hoa
+        </p>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <div className="alert alert-error">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleLogin} className="login-form">
+        <form
+          onSubmit={handleLogin}
+          className="login-form"
+        >
+          {/* Ingame */}
           <div className="form-group">
-            <label htmlFor="ingame">Ingame *</label>
+            <label htmlFor="ingame">
+              Ingame *
+            </label>
 
             <input
               type="text"
               id="ingame"
               value={ingame}
-              onChange={(e) => setIngame(e.target.value)}
+              onChange={(e) =>
+                setIngame(e.target.value)
+              }
               placeholder="Nhập ingame"
               disabled={loading}
             />
           </div>
 
+          {/* Password */}
           <div className="form-group">
-            <label htmlFor="name">Tên *</label>
+            <label htmlFor="password">
+              Password *
+            </label>
 
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Nhập tên"
-              disabled={loading}
-            />
+            <div className="password-wrapper">
+              <input
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
+                id="password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                placeholder="Nhập password"
+                disabled={loading}
+              />
+
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
+              >
+                {showPassword ? "🙈" : "👁"}
+              </button>
+            </div>
           </div>
 
-          <button type="submit" className="btn btn-login" disabled={loading}>
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          <button
+            type="submit"
+            className="btn btn-login"
+            disabled={loading}
+          >
+            {loading
+              ? "Đang đăng nhập..."
+              : "Đăng nhập"}
           </button>
         </form>
       </div>

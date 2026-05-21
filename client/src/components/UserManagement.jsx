@@ -81,11 +81,17 @@ export default function UserManagement() {
   };
 
   // Filter users based on search term
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.ingame.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredUsers = users
+    .filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.ingame.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .sort((a, b) =>
+      (a.name || a.ingame || "").localeCompare(b.name || b.ingame || "", "vi", {
+        sensitivity: "base",
+      }),
+    );
 
   return (
     <div className="user-management">

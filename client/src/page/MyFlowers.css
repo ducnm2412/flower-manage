@@ -70,6 +70,43 @@
   border-left: 4px solid var(--danger-color);
 }
 
+.admin-flower-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-flower-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-white);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.admin-flower-search input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-color-light);
+}
+
+.admin-flower-search-clear {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0 16px;
+  background: var(--bg-light);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.admin-flower-search-clear:hover {
+  background: var(--border-color-light);
+}
+
 .loading {
   text-align: center;
   padding: 40px 20px;
