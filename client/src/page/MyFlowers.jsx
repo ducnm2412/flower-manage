@@ -32,6 +32,8 @@ const sortFlowersByColor = (items) => [...items].sort((a, b) => {
   });
 });
 
+const ITEMS_PER_PAGE = 24;
+
 export default function MyFlowers() {
 
   const [flowers, setFlowers] = useState([]);
@@ -41,6 +43,7 @@ export default function MyFlowers() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [adminSearchTerm, setAdminSearchTerm] = useState("");
+  const [flowersPage, setFlowersPage] = useState(1);
 
   // ============================
   // USER INFO
@@ -52,9 +55,11 @@ export default function MyFlowers() {
 
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [allFlowers, setAllFlowers] = useState([]);
+  const [allFlowersLoaded, setAllFlowersLoaded] = useState(false);
   const [addingFlowerIds, setAddingFlowerIds] = useState([]);
   const [selectFlowerSearchTerm, setSelectFlowerSearchTerm] = useState("");
   const [activeOwnedFlowerMenu, setActiveOwnedFlowerMenu] = useState(null);
+  const [selectFlowersPage, setSelectFlowersPage] = useState(1);
 
   // ============================
   // LOAD FLOWERS
@@ -283,15 +288,19 @@ export default function MyFlowers() {
     setShowSelectModal(false);
     setSelectFlowerSearchTerm("");
     setActiveOwnedFlowerMenu(null);
+    setSelectFlowersPage(1);
   };
 
   // ============================
   // FETCH ALL FLOWERS FOR USER
   // ============================
   const fetchAllFlowers = async () => {
+    if (allFlowersLoaded) return;
+
     try {
       const response = await api.get("/flowers");
       setAllFlowers(response.data);
+      setAllFlowersLoaded(true);
     } catch (err) {
       setError("Không thể tải danh sách hoa: " + (err.response?.data?.error || err.message));
     }
@@ -402,6 +411,14 @@ export default function MyFlowers() {
   const deferredAdminSearchTerm = useDeferredValue(adminSearchTerm);
   const deferredSelectFlowerSearchTerm = useDeferredValue(selectFlowerSearchTerm);
 
+  useEffect(() => {
+    setFlowersPage(1);
+  }, [deferredAdminSearchTerm, flowers.length]);
+
+  useEffect(() => {
+    setSelectFlowersPage(1);
+  }, [deferredSelectFlowerSearchTerm, allFlowers.length]);
+
   const displayedFlowers = useMemo(() => {
     const normalizedSearchTerm = deferredAdminSearchTerm.trim().toLowerCase();
 
@@ -453,6 +470,24 @@ export default function MyFlowers() {
 
     return sortFlowersByColor(filteredFlowers);
   }, [allFlowers, deferredSelectFlowerSearchTerm]);
+
+  const flowersTotalPages = Math.max(
+    1,
+    Math.ceil(displayedFlowers.length / ITEMS_PER_PAGE),
+  );
+  const paginatedFlowers = displayedFlowers.slice(
+    (flowersPage - 1) * ITEMS_PER_PAGE,
+    flowersPage * ITEMS_PER_PAGE,
+  );
+
+  const selectFlowersTotalPages = Math.max(
+    1,
+    Math.ceil(displayedAllFlowers.length / ITEMS_PER_PAGE),
+  );
+  const paginatedAllFlowers = displayedAllFlowers.slice(
+    (selectFlowersPage - 1) * ITEMS_PER_PAGE,
+    selectFlowersPage * ITEMS_PER_PAGE,
+  );
 
   return (
 
@@ -597,70 +632,99 @@ export default function MyFlowers() {
                   <p>Không tìm thấy hoa phù hợp</p>
                 </div>
               ) : (
-              <div className="flowers-grid">
-                {displayedAllFlowers.map(flower => {
-                  const isOwned = flower.owners?.some(o => o.ingame === userIngame);
-                  const isAdding = addingFlowerIds.includes(flower.id);
-                  return (
-                    <div 
-                      key={flower.id} 
-                      style={{ 
-                        border: isOwned ? '2px solid #10ac84' : '2px solid transparent', 
-                        borderRadius: '16px', 
-                        cursor: isOwned || isAdding ? 'not-allowed' : 'pointer', 
-                        opacity: isOwned || isAdding ? 0.6 : 1,
-                        position: 'relative',
-                        transition: 'transform 0.2s',
-                        transform: !isOwned && !isAdding ? 'scale(1)' : 'none'
-                      }}
-                      onMouseEnter={(e) => { if (!isOwned && !isAdding) e.currentTarget.style.transform = 'scale(1.05)' }}
-                      onMouseLeave={(e) => { if (!isOwned && !isAdding) e.currentTarget.style.transform = 'scale(1)' }}
-                      onClick={() => !isOwned && !isAdding && handleSelectFlowerToAdd(flower.id)}
-                    >
-                      <FlowerCard flower={flower} showActions={false} />
-                      {(isOwned || isAdding) && (
-                        <>
-                          {isOwned && (
-                            <div className="select-owned-menu">
-                              <button
-                                type="button"
-                                className="select-owned-menu-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveOwnedFlowerMenu((current) =>
-                                    current === flower.id ? null : flower.id,
-                                  );
-                                }}
-                                title="Tùy chọn"
-                              >
-                                ⋮
-                              </button>
-
-                              {activeOwnedFlowerMenu === flower.id && (
-                                <div className="select-owned-dropdown">
+                <>
+                  <div className="flowers-grid">
+                    {paginatedAllFlowers.map(flower => {
+                      const isOwned = flower.owners?.some(o => o.ingame === userIngame);
+                      const isAdding = addingFlowerIds.includes(flower.id);
+                      return (
+                        <div 
+                          key={flower.id} 
+                          style={{ 
+                            border: isOwned ? '2px solid #10ac84' : '2px solid transparent', 
+                            borderRadius: '16px', 
+                            cursor: isOwned || isAdding ? 'not-allowed' : 'pointer', 
+                            opacity: isOwned || isAdding ? 0.6 : 1,
+                            position: 'relative',
+                            transition: 'transform 0.2s',
+                            transform: !isOwned && !isAdding ? 'scale(1)' : 'none'
+                          }}
+                          onMouseEnter={(e) => { if (!isOwned && !isAdding) e.currentTarget.style.transform = 'scale(1.05)' }}
+                          onMouseLeave={(e) => { if (!isOwned && !isAdding) e.currentTarget.style.transform = 'scale(1)' }}
+                          onClick={() => !isOwned && !isAdding && handleSelectFlowerToAdd(flower.id)}
+                        >
+                          <FlowerCard flower={flower} showActions={false} />
+                          {(isOwned || isAdding) && (
+                            <>
+                              {isOwned && (
+                                <div className="select-owned-menu">
                                   <button
                                     type="button"
+                                    className="select-owned-menu-btn"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleRemoveOwnedFlowerFromSelect(flower.id);
+                                      setActiveOwnedFlowerMenu((current) =>
+                                        current === flower.id ? null : flower.id,
+                                      );
                                     }}
+                                    title="Tùy chọn"
                                   >
-                                    Xóa
+                                    ⋮
                                   </button>
+
+                                  {activeOwnedFlowerMenu === flower.id && (
+                                    <div className="select-owned-dropdown">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemoveOwnedFlowerFromSelect(flower.id);
+                                        }}
+                                      >
+                                        Xóa
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               )}
-                            </div>
-                          )}
 
-                          <div className="select-owned-badge">
-                            {isAdding ? "Đang thêm..." : "Đã sở hữu"}
-                          </div>
-                        </>
-                      )}
+                              <div className="select-owned-badge">
+                                {isAdding ? "Đang thêm..." : "Đã sở hữu"}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {selectFlowersTotalPages > 1 && (
+                    <div className="pagination-controls">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectFlowersPage((page) => Math.max(1, page - 1))
+                        }
+                        disabled={selectFlowersPage === 1}
+                      >
+                        Trước
+                      </button>
+                      <span>
+                        Trang {selectFlowersPage}/{selectFlowersTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectFlowersPage((page) =>
+                            Math.min(selectFlowersTotalPages, page + 1),
+                          )
+                        }
+                        disabled={selectFlowersPage === selectFlowersTotalPages}
+                      >
+                        Sau
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -698,12 +762,9 @@ export default function MyFlowers() {
           </div>
 
         ) : (
-
-          <div className="flowers-grid">
-
-            {
-              displayedFlowers.map((flower) => (
-
+          <>
+            <div className="flowers-grid">
+              {paginatedFlowers.map((flower) => (
                 <FlowerCard
                   key={flower.id}
                   flower={flower}
@@ -711,12 +772,32 @@ export default function MyFlowers() {
                   onDelete={handleDeleteFlower}
                   showActions={true}
                 />
-
-              ))
-            }
-
-          </div>
-
+              ))}
+            </div>
+            {flowersTotalPages > 1 && (
+              <div className="pagination-controls">
+                <button
+                  type="button"
+                  onClick={() => setFlowersPage((page) => Math.max(1, page - 1))}
+                  disabled={flowersPage === 1}
+                >
+                  Trước
+                </button>
+                <span>
+                  Trang {flowersPage}/{flowersTotalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFlowersPage((page) => Math.min(flowersTotalPages, page + 1))
+                  }
+                  disabled={flowersPage === flowersTotalPages}
+                >
+                  Sau
+                </button>
+              </div>
+            )}
+          </>
         )
       }
 

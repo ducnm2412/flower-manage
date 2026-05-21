@@ -162,6 +162,17 @@
   color: var(--text-primary);
 }
 
+.user-index-column,
+.user-index {
+  width: 64px;
+  text-align: center;
+}
+
+.user-index {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
 /* Admin dashboard context - white text for table data */
 .tab-content .users-table td {
   color: var(--text-primary);

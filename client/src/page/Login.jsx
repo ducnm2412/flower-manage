@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import api from "../services/api";
@@ -7,6 +7,8 @@ import "./Login.css";
 
 export default function Login() {
   const [ingame, setIngame] = useState("");
+  const [userOptions, setUserOptions] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -15,6 +17,37 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchUserOptions = async () => {
+      setUsersLoading(true);
+
+      try {
+        const response = await api.get("/auth/user-options", {
+          signal: controller.signal,
+        });
+
+        setUserOptions(response.data || []);
+      } catch (err) {
+        if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+          setError(
+            "KhÃ´ng thá»ƒ táº£i danh sÃ¡ch tÃªn bÃ© ngoan: " +
+              (err.response?.data?.error || err.message),
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setUsersLoading(false);
+        }
+      }
+    };
+
+    fetchUserOptions();
+
+    return () => controller.abort();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -87,16 +120,23 @@ export default function Login() {
               Tên bé ngoan *
             </label>
 
-            <input
-              type="text"
+            <select
               id="ingame"
               value={ingame}
               onChange={(e) =>
                 setIngame(e.target.value)
               }
-              placeholder="Nhập tên bé ngoan"
-              disabled={loading}
-            />
+              disabled={loading || usersLoading}
+            >
+              <option value="">
+                {usersLoading ? "Đang tải tên bé ngoan..." : "Chọn tên bé ngoan"}
+              </option>
+              {userOptions.map((user) => (
+                <option key={user.ingame} value={user.ingame}>
+                  {user.name ? `${user.ingame} - ${user.name}` : user.ingame}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Password */}

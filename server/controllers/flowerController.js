@@ -2,6 +2,11 @@ import { db } from "../config/firebase.js";
 
 const normalizeSearchText = (value) => String(value || "").trim().toLowerCase();
 
+const getOwnerIngames = (owners = []) =>
+  owners
+    .map((owner) => owner?.ingame?.trim())
+    .filter(Boolean);
+
 // =====================================
 // GET ALL FLOWERS
 // =====================================
@@ -12,9 +17,17 @@ export const getAllFlowers = async (req, res) => {
     const flowers = [];
 
     snapshot.forEach((doc) => {
+      const data = doc.data();
+      const ownerIngames = getOwnerIngames(data.owners || []);
+
+      if (!Array.isArray(data.ownerIngames)) {
+        doc.ref.update({ ownerIngames }).catch(() => {});
+      }
+
       flowers.push({
         id: doc.id,
-        ...doc.data(),
+        ...data,
+        ownerIngames,
       });
     });
 
@@ -76,21 +89,20 @@ export const searchByColor = async (req, res) => {
       });
     }
 
-    const snapshot = await db.collection("flowers").get();
     const searchColorLower = normalizeSearchText(color);
+    const snapshot = await db
+      .collection("flowers")
+      .where("backgroundColor", "==", searchColorLower)
+      .get();
 
     const flowers = [];
 
     snapshot.forEach((doc) => {
       const data = doc.data();
-      const flowerColor = data.backgroundColor || "";
-
-      if (normalizeSearchText(flowerColor) === searchColorLower) {
-        flowers.push({
-          id: doc.id,
-          ...data,
-        });
-      }
+      flowers.push({
+        id: doc.id,
+        ...data,
+      });
     });
 
     res.json(flowers);
@@ -114,14 +126,34 @@ export const getFlowersByUser = async (req, res) => {
       });
     }
 
-    const snapshot = await db.collection("flowers").get();
+    let snapshot = await db
+      .collection("flowers")
+      .where("ownerIngames", "array-contains", ingame)
+      .get();
 
     const flowers = [];
 
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        flowers.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      return res.json(flowers);
+    }
+
+    snapshot = await db.collection("flowers").get();
+
     snapshot.forEach((doc) => {
       const data = doc.data();
-
       const owners = data.owners || [];
+      const ownerIngames = getOwnerIngames(owners);
+
+      if (!Array.isArray(data.ownerIngames)) {
+        doc.ref.update({ ownerIngames }).catch(() => {});
+      }
 
       const hasOwner = owners.some((owner) => owner.ingame === ingame);
 
@@ -129,6 +161,7 @@ export const getFlowersByUser = async (req, res) => {
         flowers.push({
           id: doc.id,
           ...data,
+          ownerIngames,
         });
       }
     });
@@ -207,7 +240,7 @@ export const addFlower = async (req, res) => {
     const newFlower = {
       name: name.trim(),
 
-      backgroundColor: backgroundColor || "red",
+      backgroundColor: normalizeSearchText(backgroundColor || "red"),
 
       description: description || "",
 
@@ -216,6 +249,8 @@ export const addFlower = async (req, res) => {
       event: event || "",
 
       owners,
+
+      ownerIngames: getOwnerIngames(owners),
 
       createdAt: new Date(),
     };
@@ -266,7 +301,7 @@ export const updateFlower = async (req, res) => {
     }
 
     if (backgroundColor !== undefined) {
-      updateData.backgroundColor = backgroundColor;
+      updateData.backgroundColor = normalizeSearchText(backgroundColor);
     }
 
     if (description !== undefined) {
@@ -283,6 +318,7 @@ export const updateFlower = async (req, res) => {
 
     if (owners !== undefined) {
       updateData.owners = owners;
+      updateData.ownerIngames = getOwnerIngames(owners);
     }
 
     updateData.updatedAt = new Date();
@@ -381,6 +417,7 @@ export const addOwner = async (req, res) => {
 
     await flowerRef.update({
       owners,
+      ownerIngames: getOwnerIngames(owners),
 
       updatedAt: new Date(),
     });
@@ -430,6 +467,7 @@ export const removeOwner = async (req, res) => {
 
     await flowerRef.update({
       owners: updatedOwners,
+      ownerIngames: getOwnerIngames(updatedOwners),
 
       updatedAt: new Date(),
     });

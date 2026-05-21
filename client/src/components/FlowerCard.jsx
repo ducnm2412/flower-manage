@@ -49,6 +49,8 @@ export default function FlowerCard({
           src={flower.imageUrl}
           alt={flower.name}
           className="flower-image-bg"
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <div

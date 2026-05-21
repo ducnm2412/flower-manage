@@ -98,6 +98,41 @@ export const getAllUsers = async (req, res) => {
 };
 
 // ==========================
+// GET USER OPTIONS
+// ==========================
+export const getUserOptions = async (req, res) => {
+  try {
+    const snapshot = await db.collection("users").select("ingame", "name").get();
+
+    const users = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const ingame = data.ingame?.trim();
+
+      if (ingame) {
+        users.push({
+          ingame,
+          name: data.name || "",
+        });
+      }
+    });
+
+    users.sort((a, b) =>
+      a.ingame.localeCompare(b.ingame, "vi", {
+        sensitivity: "base",
+      }),
+    );
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+// ==========================
 // ADD USER
 // ==========================
 export const addUser = async (req, res) => {

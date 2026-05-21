@@ -2,6 +2,7 @@ import express from "express";
 import {
   login,
   getAllUsers,
+  getUserOptions,
   addUser,
   updateUser,
   deleteUser,
@@ -14,6 +15,7 @@ router.post("/login", login);
 
 // Lấy tất cả user (chỉ admin)
 router.get("/users", getAllUsers);
+router.get("/user-options", getUserOptions);
 
 // Thêm user (chỉ admin)
 router.post("/users", addUser);

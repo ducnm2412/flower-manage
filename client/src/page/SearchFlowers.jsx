@@ -68,26 +68,12 @@ export default function SearchFlowers() {
       setError("");
 
       try {
-        const response = await api.get("/flowers", {
+        const response = await api.get("/auth/user-options", {
           signal: controller.signal,
-        });
-        const ownerMap = new Map();
-
-        (response.data || []).forEach((flower) => {
-          (flower.owners || []).forEach((owner) => {
-            const ingame = owner.ingame?.trim();
-
-            if (ingame && !ownerMap.has(ingame)) {
-              ownerMap.set(ingame, {
-                ingame,
-                name: owner.name || "",
-              });
-            }
-          });
         });
 
         setOwnerOptions(
-          Array.from(ownerMap.values()).sort((a, b) =>
+          (response.data || []).sort((a, b) =>
             a.ingame.localeCompare(b.ingame, "vi", {
               sensitivity: "base",
             }),

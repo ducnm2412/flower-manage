@@ -77,7 +77,8 @@
   font-size: 14px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   padding: 12px;
   border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -86,13 +87,15 @@
   transition: border-color var(--transition-normal);
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-group input:disabled {
+.form-group input:disabled,
+.form-group select:disabled {
   background-color: var(--bg-light);
   color: var(--text-light);
   cursor: not-allowed;

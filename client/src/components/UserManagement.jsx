@@ -130,6 +130,7 @@ export default function UserManagement() {
           <table className="users-table">
             <thead>
               <tr>
+                <th className="user-index-column">STT</th>
                 <th>Đăng nhập</th>
                 <th>Tên người dùng</th>
                 <th>Năm tham gia</th>
@@ -138,8 +139,9 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
+              {filteredUsers.map((user, index) => (
                 <tr key={user.id} className="user-row">
+                  <td className="user-index">{index + 1}</td>
                   <td className="user-ingame">
                     <strong>{user.ingame}</strong>
                   </td>
