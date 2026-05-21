@@ -238,6 +238,69 @@
   margin: 0;
 }
 
+.select-owned-menu {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+}
+
+.select-owned-menu-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.select-owned-menu-btn:hover {
+  background: white;
+}
+
+.select-owned-dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  width: 110px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.select-owned-dropdown button {
+  width: 100%;
+  border: none;
+  background: white;
+  color: var(--danger-color-hover);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  text-align: left;
+}
+
+.select-owned-dropdown button:hover {
+  background: #fee2e2;
+}
+
+.select-owned-badge {
+  position: absolute;
+  top: 54px;
+  right: 10px;
+  z-index: 10;
+  border-radius: 20px;
+  padding: 4px 10px;
+  background: #10ac84;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

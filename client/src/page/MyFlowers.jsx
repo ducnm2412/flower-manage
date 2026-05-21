@@ -54,6 +54,7 @@ export default function MyFlowers() {
   const [allFlowers, setAllFlowers] = useState([]);
   const [addingFlowerIds, setAddingFlowerIds] = useState([]);
   const [selectFlowerSearchTerm, setSelectFlowerSearchTerm] = useState("");
+  const [activeOwnedFlowerMenu, setActiveOwnedFlowerMenu] = useState(null);
 
   // ============================
   // LOAD FLOWERS
@@ -281,6 +282,7 @@ export default function MyFlowers() {
     setShowForm(false);
     setShowSelectModal(false);
     setSelectFlowerSearchTerm("");
+    setActiveOwnedFlowerMenu(null);
   };
 
   // ============================
@@ -343,6 +345,35 @@ export default function MyFlowers() {
       setError("Lỗi khi thêm: " + (err.response?.data?.error || err.message));
     } finally {
       setAddingFlowerIds((prev) => prev.filter((id) => id !== flowerId));
+    }
+  };
+
+  const handleRemoveOwnedFlowerFromSelect = async (flowerId) => {
+    try {
+      setActiveOwnedFlowerMenu(null);
+
+      await api.delete(`/flowers/${flowerId}/owner`, {
+        data: { ingame: userIngame },
+      });
+
+      setAllFlowers((prev) =>
+        prev.map((flower) =>
+          flower.id === flowerId
+            ? {
+                ...flower,
+                owners: (flower.owners || []).filter(
+                  (owner) => owner.ingame !== userIngame,
+                ),
+              }
+            : flower,
+        ),
+      );
+
+      setFlowers((prev) => prev.filter((flower) => flower.id !== flowerId));
+      setMessage("Xóa hoa thành công!");
+      setTimeout(() => setMessage(""), 3000);
+    } catch (err) {
+      setError("Lỗi khi xóa: " + (err.response?.data?.error || err.message));
     }
   };
 
@@ -447,6 +478,7 @@ export default function MyFlowers() {
               } else {
                 fetchAllFlowers();
                 setSelectFlowerSearchTerm("");
+                setActiveOwnedFlowerMenu(null);
                 setShowSelectModal(true);
               }
             }
@@ -587,13 +619,43 @@ export default function MyFlowers() {
                     >
                       <FlowerCard flower={flower} showActions={false} />
                       {(isOwned || isAdding) && (
-                        <div style={{
-                          position: 'absolute', top: '10px', right: '10px', 
-                          background: '#10ac84', color: 'white', padding: '4px 10px', 
-                          borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', zIndex: 10
-                        }}>
-                          {isAdding ? "Đang thêm..." : "Đã sở hữu"}
-                        </div>
+                        <>
+                          {isOwned && (
+                            <div className="select-owned-menu">
+                              <button
+                                type="button"
+                                className="select-owned-menu-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveOwnedFlowerMenu((current) =>
+                                    current === flower.id ? null : flower.id,
+                                  );
+                                }}
+                                title="Tùy chọn"
+                              >
+                                ⋮
+                              </button>
+
+                              {activeOwnedFlowerMenu === flower.id && (
+                                <div className="select-owned-dropdown">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveOwnedFlowerFromSelect(flower.id);
+                                    }}
+                                  >
+                                    Xóa
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="select-owned-badge">
+                            {isAdding ? "Đang thêm..." : "Đã sở hữu"}
+                          </div>
+                        </>
                       )}
                     </div>
                   );
@@ -624,10 +686,10 @@ export default function MyFlowers() {
             {!adminSearchTerm && (
               <button
                 className="btn btn-primary"
-                onClick={() => {
-                  if (isAdmin) setShowForm(true);
-                  else { fetchAllFlowers(); setSelectFlowerSearchTerm(""); setShowSelectModal(true); }
-                }}
+              onClick={() => {
+                if (isAdmin) setShowForm(true);
+                else { fetchAllFlowers(); setSelectFlowerSearchTerm(""); setActiveOwnedFlowerMenu(null); setShowSelectModal(true); }
+              }}
               >
                 + Thêm hoa đầu tiên
               </button>

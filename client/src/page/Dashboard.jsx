@@ -15,6 +15,9 @@ export default function Dashboard() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
@@ -187,32 +190,62 @@ export default function Dashboard() {
             <form onSubmit={handleChangePassword}>
               <div className="form-group">
                 <label>Mật khẩu cũ</label>
-                <input
-                  type="password"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu cũ"
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu cũ"
+                  />
+                  <button
+                    type="button"
+                    className="password-eye-btn"
+                    onClick={() => setShowOldPassword((value) => !value)}
+                    title={showOldPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showOldPassword ? "🙈" : "👁"}
+                  </button>
+                </div>
               </div>
 
               <div className="form-group">
                 <label>Mật khẩu mới</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu mới"
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu mới"
+                  />
+                  <button
+                    type="button"
+                    className="password-eye-btn"
+                    onClick={() => setShowNewPassword((value) => !value)}
+                    title={showNewPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showNewPassword ? "🙈" : "👁"}
+                  </button>
+                </div>
               </div>
 
               <div className="form-group">
                 <label>Nhập lại mật khẩu mới</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Nhập lại mật khẩu mới"
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Nhập lại mật khẩu mới"
+                  />
+                  <button
+                    type="button"
+                    className="password-eye-btn"
+                    onClick={() => setShowConfirmPassword((value) => !value)}
+                    title={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showConfirmPassword ? "🙈" : "👁"}
+                  </button>
+                </div>
               </div>
 
               <div className="password-modal-actions">
