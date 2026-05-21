@@ -97,7 +97,7 @@ export default function FlowerCard({
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowMenu(false);
-                      onDelete(fower.id);
+                      onDelete(flower.id);
                     }}
                   >
                     Xóa

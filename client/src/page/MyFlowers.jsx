@@ -35,6 +35,14 @@ export default function MyFlowers() {
     green: "luc lục xanh lục xanh luc green",
   };
 
+  const colorSortOrder = {
+    red: 1,
+    orange: 2,
+    purple: 3,
+    blue: 4,
+    green: 5,
+  };
+
   // ============================
   // LOAD FLOWERS
   // ============================
@@ -350,7 +358,7 @@ export default function MyFlowers() {
 
   const normalizedAdminSearchTerm = adminSearchTerm.trim().toLowerCase();
 
-  const displayedFlowers =
+  const displayedFlowers = (
     isAdmin && normalizedAdminSearchTerm
       ? flowers.filter((flower) => {
           const ownerText = (flower.owners || [])
@@ -370,7 +378,18 @@ export default function MyFlowers() {
 
           return searchableText.includes(normalizedAdminSearchTerm);
         })
-      : flowers;
+      : flowers
+  ).sort((a, b) => {
+    const colorCompare =
+      (colorSortOrder[a.backgroundColor] || 99) -
+      (colorSortOrder[b.backgroundColor] || 99);
+
+    if (colorCompare !== 0) return colorCompare;
+
+    return (a.name || "").localeCompare(b.name || "", "vi", {
+      sensitivity: "base",
+    });
+  });
 
   const normalizedSelectFlowerSearchTerm = selectFlowerSearchTerm
     .trim()

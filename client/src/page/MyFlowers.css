@@ -197,6 +197,46 @@
   padding: 30px;
 }
 
+.select-flower-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.select-flower-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.select-flower-search input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-color-light);
+}
+
+.select-flower-search button {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0 16px;
+  background: var(--bg-light);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.select-flower-search button:hover {
+  background: var(--border-color-light);
+}
+
+.select-flower-empty {
+  margin: 0;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

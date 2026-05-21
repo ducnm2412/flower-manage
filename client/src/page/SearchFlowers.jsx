@@ -36,6 +36,27 @@ export default function SearchFlowers() {
     green: "green",
   };
 
+  const colorSortOrder = {
+    red: 1,
+    orange: 2,
+    purple: 3,
+    blue: 4,
+    green: 5,
+  };
+
+  const sortFlowersByColor = (items) =>
+    [...items].sort((a, b) => {
+      const colorCompare =
+        (colorSortOrder[a.backgroundColor] || 99) -
+        (colorSortOrder[b.backgroundColor] || 99);
+
+      if (colorCompare !== 0) return colorCompare;
+
+      return (a.name || "").localeCompare(b.name || "", "vi", {
+        sensitivity: "base",
+      });
+    });
+
   useEffect(() => {
     if (activeSearchType !== "username" || ownerOptions.length > 0) return;
 
@@ -123,7 +144,7 @@ export default function SearchFlowers() {
         );
       }
 
-      setFlowers(response.data || []);
+      setFlowers(sortFlowersByColor(response.data || []));
     } catch (err) {
       setError(
         "Không thể tìm kiếm hoa: " + (err.response?.data?.error || err.message),
