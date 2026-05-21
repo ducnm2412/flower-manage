@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../services/api";
 import FlowerCard from "../components/FlowerCard";
 import SearchBar from "../components/SearchBar";
@@ -14,6 +14,9 @@ export default function SearchFlowers() {
   });
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedFlower, setSelectedFlower] = useState(null);
+  const [activeSearchType, setActiveSearchType] = useState("name");
+  const [ownerOptions, setOwnerOptions] = useState([]);
+  const [ownersLoading, setOwnersLoading] = useState(false);
 
   // Map Vietnamese color names to English
   const colorMap = {
@@ -32,6 +35,60 @@ export default function SearchFlowers() {
     "xanh luc": "green",
     green: "green",
   };
+
+  useEffect(() => {
+    if (activeSearchType !== "username" || ownerOptions.length > 0) return;
+
+    const controller = new AbortController();
+
+    const fetchOwnerOptions = async () => {
+      setOwnersLoading(true);
+      setError("");
+
+      try {
+        const response = await api.get("/flowers", {
+          signal: controller.signal,
+        });
+        const ownerMap = new Map();
+
+        (response.data || []).forEach((flower) => {
+          (flower.owners || []).forEach((owner) => {
+            const ingame = owner.ingame?.trim();
+
+            if (ingame && !ownerMap.has(ingame)) {
+              ownerMap.set(ingame, {
+                ingame,
+                name: owner.name || "",
+              });
+            }
+          });
+        });
+
+        setOwnerOptions(
+          Array.from(ownerMap.values()).sort((a, b) =>
+            a.ingame.localeCompare(b.ingame, "vi", {
+              sensitivity: "base",
+            }),
+          ),
+        );
+      } catch (err) {
+        if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+          setError(
+            "Không thể tải danh sách ingame: " +
+              (err.response?.data?.error || err.message),
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setOwnersLoading(false);
+        }
+      }
+    };
+
+    fetchOwnerOptions();
+
+    return () => controller.abort();
+  }, [activeSearchType, ownerOptions.length]);
 
   const handleSearch = async (params) => {
     setSearchParams(params);
@@ -62,7 +119,7 @@ export default function SearchFlowers() {
         );
       } else if (params.type === "username") {
         response = await api.get(
-          `/flowers/username/${encodeURIComponent(query)}`,
+          `/flowers/user/${encodeURIComponent(query)}`,
         );
       }
 
@@ -89,7 +146,18 @@ export default function SearchFlowers() {
         <h1>Tra cứu hoa</h1>
       </div>
 
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar
+        onSearch={handleSearch}
+        ownerOptions={ownerOptions}
+        ownersLoading={ownersLoading}
+        onTypeChange={(type) => {
+          setActiveSearchType(type);
+          setSelectedFlower(null);
+          setHasSearched(false);
+          setFlowers([]);
+          setError("");
+        }}
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
 

@@ -25,6 +25,7 @@ export default function MyFlowers() {
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [allFlowers, setAllFlowers] = useState([]);
   const [addingFlowerIds, setAddingFlowerIds] = useState([]);
+  const [selectFlowerSearchTerm, setSelectFlowerSearchTerm] = useState("");
 
   const colorLabels = {
     red: "do đỏ red",
@@ -259,6 +260,7 @@ export default function MyFlowers() {
     setEditingFlower(null);
     setShowForm(false);
     setShowSelectModal(false);
+    setSelectFlowerSearchTerm("");
   };
 
   // ============================
@@ -370,6 +372,25 @@ export default function MyFlowers() {
         })
       : flowers;
 
+  const normalizedSelectFlowerSearchTerm = selectFlowerSearchTerm
+    .trim()
+    .toLowerCase();
+
+  const filteredAllFlowers = normalizedSelectFlowerSearchTerm
+    ? allFlowers.filter((flower) => {
+        const searchableText = [
+          flower.name,
+          flower.backgroundColor,
+          colorLabels[flower.backgroundColor],
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedSelectFlowerSearchTerm);
+      })
+    : allFlowers;
+
   return (
 
     <div className="my-flowers">
@@ -393,6 +414,7 @@ export default function MyFlowers() {
                 setShowForm(true);
               } else {
                 fetchAllFlowers();
+                setSelectFlowerSearchTerm("");
                 setShowSelectModal(true);
               }
             }
@@ -487,8 +509,30 @@ export default function MyFlowers() {
               <button className="modal-close" onClick={handleCancel}>✕</button>
             </div>
             <div className="modal-body">
+              <div className="select-flower-search">
+                <input
+                  type="text"
+                  value={selectFlowerSearchTerm}
+                  onChange={(e) => setSelectFlowerSearchTerm(e.target.value)}
+                  placeholder="Tìm theo tên hoa hoặc màu nền..."
+                />
+                {selectFlowerSearchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectFlowerSearchTerm("")}
+                  >
+                    Xóa
+                  </button>
+                )}
+              </div>
+
+              {filteredAllFlowers.length === 0 ? (
+                <div className="empty-state select-flower-empty">
+                  <p>Không tìm thấy hoa phù hợp</p>
+                </div>
+              ) : (
               <div className="flowers-grid">
-                {allFlowers.map(flower => {
+                {filteredAllFlowers.map(flower => {
                   const isOwned = flower.owners?.some(o => o.ingame === userIngame);
                   const isAdding = addingFlowerIds.includes(flower.id);
                   return (
@@ -521,6 +565,7 @@ export default function MyFlowers() {
                   );
                 })}
               </div>
+              )}
             </div>
           </div>
         </div>
@@ -546,7 +591,7 @@ export default function MyFlowers() {
               className="btn btn-primary"
               onClick={() => {
                 if (isAdmin) setShowForm(true);
-                else { fetchAllFlowers(); setShowSelectModal(true); }
+                else { fetchAllFlowers(); setSelectFlowerSearchTerm(""); setShowSelectModal(true); }
               }}
             >
               + Thêm hoa đầu tiên
