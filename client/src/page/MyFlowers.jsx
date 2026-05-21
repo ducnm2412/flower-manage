@@ -407,6 +407,8 @@ export default function MyFlowers() {
       ? allFlowers.filter((flower) => {
           const searchableText = [
             flower.name,
+            flower.event,
+            flower.description,
             flower.backgroundColor,
             colorLabels[flower.backgroundColor],
           ]
@@ -546,7 +548,7 @@ export default function MyFlowers() {
                   type="text"
                   value={selectFlowerSearchTerm}
                   onChange={(e) => setSelectFlowerSearchTerm(e.target.value)}
-                  placeholder="Tìm theo tên hoa hoặc màu nền..."
+                  placeholder="Tìm theo tên hoa, màu nền hoặc sự kiện..."
                 />
                 {selectFlowerSearchTerm && (
                   <button
