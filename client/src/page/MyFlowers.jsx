@@ -1,8 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useDeferredValue, useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import FlowerCard from "../components/FlowerCard";
 import FlowerForm from "../components/FlowerForm";
 import "./MyFlowers.css";
+
+const colorLabels = {
+  red: "do đỏ red",
+  purple: "tim tím purple",
+  orange: "cam orange",
+  blue: "lam xanh lam blue",
+  green: "luc lục xanh lục xanh luc green",
+};
+
+const colorSortOrder = {
+  red: 1,
+  orange: 2,
+  purple: 3,
+  blue: 4,
+  green: 5,
+};
+
+const sortFlowersByColor = (items) => [...items].sort((a, b) => {
+  const colorCompare =
+    (colorSortOrder[a.backgroundColor] || 99) -
+    (colorSortOrder[b.backgroundColor] || 99);
+
+  if (colorCompare !== 0) return colorCompare;
+
+  return (a.name || "").localeCompare(b.name || "", "vi", {
+    sensitivity: "base",
+  });
+});
 
 export default function MyFlowers() {
 
@@ -26,22 +54,6 @@ export default function MyFlowers() {
   const [allFlowers, setAllFlowers] = useState([]);
   const [addingFlowerIds, setAddingFlowerIds] = useState([]);
   const [selectFlowerSearchTerm, setSelectFlowerSearchTerm] = useState("");
-
-  const colorLabels = {
-    red: "do đỏ red",
-    purple: "tim tím purple",
-    orange: "cam orange",
-    blue: "lam xanh lam blue",
-    green: "luc lục xanh lục xanh luc green",
-  };
-
-  const colorSortOrder = {
-    red: 1,
-    orange: 2,
-    purple: 3,
-    blue: 4,
-    green: 5,
-  };
 
   // ============================
   // LOAD FLOWERS
@@ -356,10 +368,13 @@ export default function MyFlowers() {
     }
   };
 
-  const normalizedAdminSearchTerm = adminSearchTerm.trim().toLowerCase();
+  const deferredAdminSearchTerm = useDeferredValue(adminSearchTerm);
+  const deferredSelectFlowerSearchTerm = useDeferredValue(selectFlowerSearchTerm);
 
-  const displayedFlowers = (
-    isAdmin && normalizedAdminSearchTerm
+  const displayedFlowers = useMemo(() => {
+    const normalizedSearchTerm = deferredAdminSearchTerm.trim().toLowerCase();
+
+    const filteredFlowers = normalizedSearchTerm
       ? flowers.filter((flower) => {
           const ownerText = (flower.owners || [])
             .map((owner) => `${owner.ingame || ""} ${owner.name || ""}`)
@@ -376,39 +391,35 @@ export default function MyFlowers() {
             .join(" ")
             .toLowerCase();
 
-          return searchableText.includes(normalizedAdminSearchTerm);
+          return searchableText.includes(normalizedSearchTerm);
         })
-      : flowers
-  ).sort((a, b) => {
-    const colorCompare =
-      (colorSortOrder[a.backgroundColor] || 99) -
-      (colorSortOrder[b.backgroundColor] || 99);
+      : flowers;
 
-    if (colorCompare !== 0) return colorCompare;
+    return sortFlowersByColor(filteredFlowers);
+  }, [deferredAdminSearchTerm, flowers]);
 
-    return (a.name || "").localeCompare(b.name || "", "vi", {
-      sensitivity: "base",
-    });
-  });
+  const displayedAllFlowers = useMemo(() => {
+    const normalizedSearchTerm = deferredSelectFlowerSearchTerm
+      .trim()
+      .toLowerCase();
 
-  const normalizedSelectFlowerSearchTerm = selectFlowerSearchTerm
-    .trim()
-    .toLowerCase();
+    const filteredFlowers = normalizedSearchTerm
+      ? allFlowers.filter((flower) => {
+          const searchableText = [
+            flower.name,
+            flower.backgroundColor,
+            colorLabels[flower.backgroundColor],
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
-  const filteredAllFlowers = normalizedSelectFlowerSearchTerm
-    ? allFlowers.filter((flower) => {
-        const searchableText = [
-          flower.name,
-          flower.backgroundColor,
-          colorLabels[flower.backgroundColor],
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+          return searchableText.includes(normalizedSearchTerm);
+        })
+      : allFlowers;
 
-        return searchableText.includes(normalizedSelectFlowerSearchTerm);
-      })
-    : allFlowers;
+    return sortFlowersByColor(filteredFlowers);
+  }, [allFlowers, deferredSelectFlowerSearchTerm]);
 
   return (
 
@@ -465,25 +476,27 @@ export default function MyFlowers() {
         )
       }
 
-      {isAdmin && (
-        <div className="admin-flower-search">
-          <input
-            type="text"
-            value={adminSearchTerm}
-            onChange={(e) => setAdminSearchTerm(e.target.value)}
-            placeholder="Tìm kiếm hoa theo tên, màu nền, sự kiện hoặc chủ sở hữu..."
-          />
-          {adminSearchTerm && (
-            <button
-              type="button"
-              className="admin-flower-search-clear"
-              onClick={() => setAdminSearchTerm("")}
-            >
-              Xóa
-            </button>
-          )}
-        </div>
-      )}
+      <div className="admin-flower-search">
+        <input
+          type="text"
+          value={adminSearchTerm}
+          onChange={(e) => setAdminSearchTerm(e.target.value)}
+          placeholder={
+            isAdmin
+              ? "Tìm kiếm hoa theo tên, màu nền, sự kiện hoặc chủ sở hữu..."
+              : "Tìm kiếm hoa theo tên, màu nền hoặc sự kiện..."
+          }
+        />
+        {adminSearchTerm && (
+          <button
+            type="button"
+            className="admin-flower-search-clear"
+            onClick={() => setAdminSearchTerm("")}
+          >
+            Xóa
+          </button>
+        )}
+      </div>
 
       {/* FORM */}
       {showForm && (
@@ -545,13 +558,13 @@ export default function MyFlowers() {
                 )}
               </div>
 
-              {filteredAllFlowers.length === 0 ? (
+              {displayedAllFlowers.length === 0 ? (
                 <div className="empty-state select-flower-empty">
                   <p>Không tìm thấy hoa phù hợp</p>
                 </div>
               ) : (
               <div className="flowers-grid">
-                {filteredAllFlowers.map(flower => {
+                {displayedAllFlowers.map(flower => {
                   const isOwned = flower.owners?.some(o => o.ingame === userIngame);
                   const isAdding = addingFlowerIds.includes(flower.id);
                   return (
@@ -603,18 +616,20 @@ export default function MyFlowers() {
           <div className="empty-state">
 
             <p>
-              Bạn chưa có hoa nào
+              {adminSearchTerm ? "Không tìm thấy hoa phù hợp" : "Bạn chưa có hoa nào"}
             </p>
 
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                if (isAdmin) setShowForm(true);
-                else { fetchAllFlowers(); setSelectFlowerSearchTerm(""); setShowSelectModal(true); }
-              }}
-            >
-              + Thêm hoa đầu tiên
-            </button>
+            {!adminSearchTerm && (
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  if (isAdmin) setShowForm(true);
+                  else { fetchAllFlowers(); setSelectFlowerSearchTerm(""); setShowSelectModal(true); }
+                }}
+              >
+                + Thêm hoa đầu tiên
+              </button>
+            )}
 
           </div>
 

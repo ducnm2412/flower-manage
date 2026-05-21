@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import api from "../services/api";
 import FlowerCard from "../components/FlowerCard";
 import SearchBar from "../components/SearchBar";
@@ -17,6 +17,7 @@ export default function SearchFlowers() {
   const [activeSearchType, setActiveSearchType] = useState("name");
   const [ownerOptions, setOwnerOptions] = useState([]);
   const [ownersLoading, setOwnersLoading] = useState(false);
+  const activeSearchControllerRef = useRef(null);
 
   // Map Vietnamese color names to English
   const colorMap = {
@@ -112,6 +113,10 @@ export default function SearchFlowers() {
   }, [activeSearchType, ownerOptions.length]);
 
   const handleSearch = async (params) => {
+    activeSearchControllerRef.current?.abort();
+    const controller = new AbortController();
+    activeSearchControllerRef.current = controller;
+
     setSearchParams(params);
     setHasSearched(true);
     setSelectedFlower(null);
@@ -130,6 +135,7 @@ export default function SearchFlowers() {
       if (params.type === "name") {
         response = await api.get(
           `/flowers/search/name/${encodeURIComponent(query)}`,
+          { signal: controller.signal },
         );
       } else if (params.type === "color") {
         // Convert Vietnamese color name to English
@@ -137,21 +143,27 @@ export default function SearchFlowers() {
         const colorQuery = colorMap[normalizedQuery] || normalizedQuery;
         response = await api.get(
           `/flowers/search/color/${encodeURIComponent(colorQuery)}`,
+          { signal: controller.signal },
         );
       } else if (params.type === "username") {
         response = await api.get(
           `/flowers/user/${encodeURIComponent(query)}`,
+          { signal: controller.signal },
         );
       }
 
       setFlowers(sortFlowersByColor(response.data || []));
     } catch (err) {
-      setError(
-        "Không thể tìm kiếm hoa: " + (err.response?.data?.error || err.message),
-      );
-      setFlowers([]);
+      if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+        setError(
+          "Không thể tìm kiếm hoa: " + (err.response?.data?.error || err.message),
+        );
+        setFlowers([]);
+      }
     } finally {
-      setLoading(false);
+      if (activeSearchControllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   };
 
