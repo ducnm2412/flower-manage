@@ -48,13 +48,13 @@ export default function SearchBar({
           >
             <option value="name">Tên hoa</option>
             <option value="color">Màu nền</option>
-            <option value="username">Chủ nhân (ingame)</option>
+            <option value="username">Tên bé ngoan</option>
           </select>
         </div>
 
         <div className="search-field">
           <label htmlFor="searchQuery">
-            {type === "username" ? "Chọn ingame:" : "Từ khóa:"}
+            {type === "username" ? "Chọn tên bé ngoan:" : "Từ khóa:"}
           </label>
           {type === "username" ? (
             <select
@@ -65,7 +65,7 @@ export default function SearchBar({
               disabled={ownersLoading}
             >
               <option value="">
-                {ownersLoading ? "Đang tải ingame..." : "Chọn ingame"}
+                {ownersLoading ? "Đang tải tên bé ngoan..." : "Chọn tên bé ngoan"}
               </option>
               {ownerOptions.map((owner) => (
                 <option key={owner.ingame} value={owner.ingame}>

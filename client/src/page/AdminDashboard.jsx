@@ -50,7 +50,7 @@ export default function AdminDashboard() {
       <nav className="navbar">
         <div className="navbar-content">
           <div className="navbar-brand">
-            <h2>🌸 Admin Panel</h2>
+            <h2>🌸 Hội Bé Ngoan</h2>
           </div>
           <button
             className={`hamburger-menu ${mobileMenuOpen ? "active" : ""}`}

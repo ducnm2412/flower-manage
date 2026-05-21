@@ -98,7 +98,7 @@ export default function Dashboard() {
       <nav className="navbar">
         <div className="navbar-content">
           <div className="navbar-brand">
-            <h2>🌸 Flower Manage</h2>
+            <h2>🌸 Hội Bé Ngoan</h2>
           </div>
 
           <button

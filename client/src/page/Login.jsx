@@ -84,7 +84,7 @@ export default function Login() {
           {/* Ingame */}
           <div className="form-group">
             <label htmlFor="ingame">
-              Ingame *
+              Tên bé ngoan *
             </label>
 
             <input
@@ -94,7 +94,7 @@ export default function Login() {
               onChange={(e) =>
                 setIngame(e.target.value)
               }
-              placeholder="Nhập ingame"
+              placeholder="Nhập tên bé ngoan"
               disabled={loading}
             />
           </div>
