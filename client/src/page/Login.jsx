@@ -9,6 +9,7 @@ export default function Login() {
   const [ingame, setIngame] = useState("");
   const [userOptions, setUserOptions] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [usersLoadFailed, setUsersLoadFailed] = useState(false);
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -30,10 +31,12 @@ export default function Login() {
         });
 
         setUserOptions(response.data || []);
+        setUsersLoadFailed(false);
       } catch (err) {
         if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+          setUsersLoadFailed(true);
           setError(
-            "KhÃ´ng thá»ƒ táº£i danh sÃ¡ch tÃªn bÃ© ngoan: " +
+            "Không thể tải danh sách tên bé ngoan: " +
               (err.response?.data?.error || err.message),
           );
         }
@@ -56,7 +59,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Validate
       if (!ingame.trim() || !password.trim()) {
         setError("Ingame và password không được để trống");
 
@@ -65,13 +67,11 @@ export default function Login() {
         return;
       }
 
-      // API LOGIN
       const response = await api.post("/auth/login", {
         ingame: ingame.trim(),
         password: password.trim(),
       });
 
-      // Save localStorage
       localStorage.setItem("userId", response.data.user.id);
 
       localStorage.setItem("userIngame", response.data.user.ingame);
@@ -82,7 +82,6 @@ export default function Login() {
 
       localStorage.setItem("userYear", response.data.user.year);
 
-      // Redirect
       if (response.data.user.role === "admin") {
         navigate("/admin");
       } else {
@@ -114,32 +113,42 @@ export default function Login() {
           onSubmit={handleLogin}
           className="login-form"
         >
-          {/* Ingame */}
           <div className="form-group">
             <label htmlFor="ingame">
               Tên bé ngoan *
             </label>
 
-            <select
-              id="ingame"
-              value={ingame}
-              onChange={(e) =>
-                setIngame(e.target.value)
-              }
-              disabled={loading || usersLoading}
-            >
-              <option value="">
-                {usersLoading ? "Đang tải tên bé ngoan..." : "Chọn tên bé ngoan"}
-              </option>
-              {userOptions.map((user) => (
-                <option key={user.ingame} value={user.ingame}>
-                  {user.name ? `${user.ingame} - ${user.name}` : user.ingame}
+            {usersLoadFailed ? (
+              <input
+                id="ingame"
+                value={ingame}
+                onChange={(e) =>
+                  setIngame(e.target.value)
+                }
+                placeholder="Nhập ingame"
+                disabled={loading}
+              />
+            ) : (
+              <select
+                id="ingame"
+                value={ingame}
+                onChange={(e) =>
+                  setIngame(e.target.value)
+                }
+                disabled={loading || usersLoading}
+              >
+                <option value="">
+                  {usersLoading ? "Đang tải tên bé ngoan..." : "Chọn tên bé ngoan"}
                 </option>
-              ))}
-            </select>
+                {userOptions.map((user) => (
+                  <option key={user.ingame} value={user.ingame}>
+                    {user.ingame}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
-          {/* Password */}
           <div className="form-group">
             <label htmlFor="password">
               Password *
@@ -164,6 +173,7 @@ export default function Login() {
               <button
                 type="button"
                 className="toggle-password"
+                aria-label={showPassword ? "Ẩn password" : "Hiện password"}
                 onClick={() =>
                   setShowPassword(
                     !showPassword
